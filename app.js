@@ -41,21 +41,5 @@
         displayLoading();
     }
     
-    const getUserLocation = () => {
-        if('geolocation' in navigator) {
-            console.log("We have geolocation.");
-            navigator.geolocation.getCurrentPosition((pos) => {
-                console.log(`Current position: (${pos.coords.latitude}, ${pos.coords.longitude})`);
-            });
-        } else {
-            console.error("We DO NOT have geolocation!");
-        }
-    }
 
-    startup();
-    setTimeout(() => {
-        stopLoadingMessage();
-
-        getUserLocation();
-    }, 2000);
 })();
