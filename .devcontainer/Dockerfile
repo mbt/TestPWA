@@ -1,2 +1,3 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
-RUN apt-get update && apt-get install -y xz-utils
+FROM nginx:stable
+
+# Need to get the assets from Git...?
