@@ -1,6 +1,7 @@
 {
     "name": "Test PWA",
     "short_name": "TestPWA",
+    "description": "A test Progressive Web Application demonstrating PWA capabilities",
     "icons": [
         {
             "src": "icons/app_32.png",
@@ -25,14 +26,19 @@
         {
             "src": "icons/app_512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "icons/app.svg",
             "sizes": "any",
-            "type": "image/svg"
+            "type": "image/svg+xml"
         }
     ],
     "start_url": ".",
-    "display": "standalone"
+    "scope": ".",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#501464",
+    "background_color": "#141414"
 }

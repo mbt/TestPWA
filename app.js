@@ -15,9 +15,16 @@
     const removeLoading = () => {
         console.log("Removing the loading message...");
         let msgLoading = document.getElementById('msgLoading');
-        msgLoading.remove();
 
-        setTimeout(displayLoading, hideTime);
+        // Check if element exists before removing
+        if (msgLoading) {
+            msgLoading.remove();
+        }
+
+        // Only continue the loop if not loaded
+        if (!loaded) {
+            setTimeout(displayLoading, hideTime);
+        }
     }
 
     const displayLoading = () => {
@@ -31,15 +38,36 @@
         let msgLoading = document.createElement('p');
         msgLoading.id = 'msgLoading';
         msgLoading.innerText = 'Application is loading, please wait...';
-    
+
         body.appendChild(msgLoading);
         setTimeout(removeLoading, displayTime);
+    }
+
+    // Register service worker for PWA functionality
+    const registerServiceWorker = async () => {
+        if ('serviceWorker' in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.register('sw.js');
+                console.log('Service Worker registered successfully:', registration.scope);
+            } catch (error) {
+                console.error('Service Worker registration failed:', error);
+            }
+        }
     }
 
     // The application entrypoint.
     const startup = () => {
         displayLoading();
-    }
-    
+        registerServiceWorker();
 
+        // Simulate app loading, then stop the loading message
+        setTimeout(stopLoadingMessage, 2000);
+    }
+
+    // Call startup when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startup);
+    } else {
+        startup();
+    }
 })();
