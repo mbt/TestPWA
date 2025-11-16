@@ -1,0 +1,28 @@
+{
+  "name": "testpwa",
+  "version": "1.0.0",
+  "description": "A test Progressive Web Application demonstrating PWA capabilities",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1",
+    "docker:build": "docker build -f .devcontainer/Dockerfile -t testpwa .",
+    "docker:run": "docker run -p 8080:80 testpwa",
+    "validate:manifest": "npx web-app-manifest-validator application.webmanifest"
+  },
+  "keywords": [
+    "pwa",
+    "progressive-web-app",
+    "service-worker",
+    "offline-first"
+  ],
+  "author": "Michael B. Trausch",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "http://127.0.0.1:16323/git/mbt/TestPWA"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
