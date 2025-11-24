@@ -60,8 +60,11 @@
         displayLoading();
         registerServiceWorker();
 
-        // Simulate app loading, then stop the loading message
-        setTimeout(stopLoadingMessage, 2000);
+        // Initialize the gallery
+        setTimeout(() => {
+            stopLoadingMessage();
+            Gallery.render(body);
+        }, 1000);
     }
 
     // Call startup when DOM is ready
