@@ -68,16 +68,19 @@ class AnalogClock extends HTMLElement {
                 fill: var(--analog-clock-face-color, Canvas);
                 stroke: var(--analog-clock-border-color, currentColor);
                 stroke-width: var(--analog-clock-border-width, 2);
+                transition: fill 0.3s ease, stroke 0.3s ease;
             }
 
             .analog-clock-tick {
                 stroke: var(--analog-clock-tick-color, currentColor);
                 stroke-width: 1.5;
                 stroke-linecap: round;
+                transition: stroke 0.3s ease;
             }
 
             .analog-clock-hand {
                 stroke-linecap: round;
+                transition: stroke 0.3s ease;
             }
 
             .analog-clock-hour-hand {
@@ -97,6 +100,7 @@ class AnalogClock extends HTMLElement {
 
             .analog-clock-center {
                 fill: var(--analog-clock-center-color, currentColor);
+                transition: fill 0.3s ease;
             }
         `;
         this._shadow.appendChild(style);
