@@ -2,7 +2,7 @@
  * Our service worker.
  */
 
-const CACHE_NAME = 'testpwa-v7';
+const CACHE_NAME = 'testpwa-v8';
 const urlsToCache = [
     '.',
     'index.html',

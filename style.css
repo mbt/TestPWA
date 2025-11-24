@@ -26,9 +26,14 @@
     --clock-second-hand: rgb(255, 50, 50);
 }
 
-/* Default analog clock color (dark mode) */
+/* Default analog clock colors (dark mode) */
 analog-clock {
+    --analog-clock-face-color: rgb(35, 35, 35);
+    --analog-clock-border-color: rgb(200, 200, 200);
+    --analog-clock-tick-color: rgb(200, 200, 200);
+    --analog-clock-hand-color: rgb(200, 200, 200);
     --analog-clock-second-hand-color: rgb(255, 50, 50);
+    --analog-clock-center-color: rgb(200, 200, 200);
 }
 
 @media (prefers-color-scheme: light) {
@@ -58,7 +63,12 @@ analog-clock {
     }
 
     analog-clock {
+        --analog-clock-face-color: rgb(255, 255, 255);
+        --analog-clock-border-color: rgb(60, 60, 60);
+        --analog-clock-tick-color: rgb(60, 60, 60);
+        --analog-clock-hand-color: rgb(40, 40, 40);
         --analog-clock-second-hand-color: rgb(180, 30, 30);
+        --analog-clock-center-color: rgb(40, 40, 40);
     }
 }
 
@@ -91,7 +101,12 @@ html[data-theme="light"] {
 }
 
 html[data-theme="light"] analog-clock {
+    --analog-clock-face-color: rgb(255, 255, 255);
+    --analog-clock-border-color: rgb(60, 60, 60);
+    --analog-clock-tick-color: rgb(60, 60, 60);
+    --analog-clock-hand-color: rgb(40, 40, 40);
     --analog-clock-second-hand-color: rgb(180, 30, 30);
+    --analog-clock-center-color: rgb(40, 40, 40);
 }
 
 /* Manual theme override - dark mode */
@@ -123,7 +138,12 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] analog-clock {
+    --analog-clock-face-color: rgb(35, 35, 35);
+    --analog-clock-border-color: rgb(200, 200, 200);
+    --analog-clock-tick-color: rgb(200, 200, 200);
+    --analog-clock-hand-color: rgb(200, 200, 200);
     --analog-clock-second-hand-color: rgb(255, 50, 50);
+    --analog-clock-center-color: rgb(200, 200, 200);
 }
 
 html {
@@ -558,7 +578,6 @@ html {
 
 .component-demo analog-clock {
     --analog-clock-size: 300px;
-    --analog-clock-second-hand-color: var(--clock-second-hand);
 }
 
 @media (max-width: 768px) {
