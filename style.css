@@ -14,3 +14,219 @@ html {
     padding: 1em;
     border-radius: 10px;
 }
+
+/* Gallery Styles */
+.gallery {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.gallery-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.gallery-title {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    color: rgb(230, 230, 230);
+}
+
+.gallery-subtitle {
+    font-size: 1.1rem;
+    color: rgb(150, 150, 150);
+    margin: 0;
+}
+
+.section-heading {
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    color: rgb(200, 200, 200);
+    border-bottom: 2px solid rgb(80, 20, 100);
+    padding-bottom: 0.5rem;
+}
+
+/* Carousel Styles */
+.carousel-section {
+    margin-bottom: 3rem;
+}
+
+.carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.carousel-viewport {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+}
+
+.carousel-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgb(80, 20, 100);
+    color: rgb(230, 230, 230);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-btn:hover {
+    background-color: rgb(100, 30, 130);
+    transform: scale(1.1);
+}
+
+.carousel-btn:active {
+    transform: scale(0.95);
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgb(80, 20, 100);
+    border-radius: 50%;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.2s ease;
+}
+
+.carousel-dot.active,
+.carousel-dot:hover {
+    background-color: rgb(80, 20, 100);
+}
+
+/* Component Card Styles */
+.component-card {
+    background-color: rgb(35, 35, 35);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid rgb(50, 50, 50);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.component-card:hover {
+    border-color: rgb(80, 20, 100);
+    transform: translateY(-2px);
+}
+
+.component-card.featured {
+    background-color: rgb(40, 30, 50);
+    border-color: rgb(80, 20, 100);
+    min-height: 200px;
+}
+
+.component-card-title {
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem 0;
+    color: rgb(230, 230, 230);
+}
+
+.component-card-description {
+    font-size: 0.95rem;
+    color: rgb(170, 170, 170);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.component-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.component-card-date {
+    font-size: 0.85rem;
+    color: rgb(120, 120, 120);
+}
+
+.component-card-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.component-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background-color: rgb(60, 40, 70);
+    color: rgb(180, 150, 200);
+    border-radius: 4px;
+}
+
+/* Component List Styles */
+.component-list-section {
+    margin-bottom: 2rem;
+}
+
+.component-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gallery-title {
+        font-size: 2rem;
+    }
+
+    .carousel-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
+    }
+
+    .component-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery {
+        padding: 1rem;
+    }
+
+    .gallery-title {
+        font-size: 1.75rem;
+    }
+
+    .carousel-btn {
+        display: none;
+    }
+
+    .component-card-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
