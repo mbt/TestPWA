@@ -7,6 +7,14 @@ const Gallery = (function() {
     // Sample component data - will be replaced with real components
     const components = [
         {
+            id: 'analog-clock',
+            name: 'Analog Clock',
+            description: 'An animated analog clock with smooth hand movement. Respects reduced motion preferences and is fully customizable with CSS.',
+            dateAdded: '2025-11-24T00:00:00Z',
+            tags: ['time', 'animation', 'interactive'],
+            featured: true
+        },
+        {
             id: 'example-button',
             name: 'Example Button',
             description: 'A customizable button component with various styles and states.',
