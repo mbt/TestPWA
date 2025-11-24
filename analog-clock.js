@@ -14,6 +14,10 @@
  * --analog-clock-second-hand-color: Color of second hand
  * --analog-clock-tick-color: Color of hour markers
  * --analog-clock-center-color: Color of center dot
+ * --analog-clock-number-color: Color of hour numbers (default: currentColor)
+ * --analog-clock-font-family: Font family for numbers (default: system sans-serif)
+ * --analog-clock-font-size: Font size for numbers (default: 10px)
+ * --analog-clock-font-weight: Font weight for numbers (default: 400)
  */
 
 class AnalogClock extends HTMLElement {
@@ -76,6 +80,14 @@ class AnalogClock extends HTMLElement {
                 stroke-linecap: round;
             }
 
+            .analog-clock-number {
+                fill: var(--analog-clock-number-color, currentColor);
+                font-family: var(--analog-clock-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+                font-size: var(--analog-clock-font-size, 10px);
+                font-weight: var(--analog-clock-font-weight, 400);
+                user-select: none;
+            }
+
             .analog-clock-hand {
                 stroke-linecap: round;
             }
@@ -129,6 +141,21 @@ class AnalogClock extends HTMLElement {
             line.setAttribute('y2', 50 - outerRadius * Math.cos(angle));
             line.setAttribute('class', 'analog-clock-tick');
             svg.appendChild(line);
+        }
+
+        // Hour numbers
+        for (let i = 1; i <= 12; i++) {
+            const angle = ((i * 30) - 90) * (Math.PI / 180); // -90 to start at 12 o'clock
+            const numberRadius = 35; // Position numbers inside the tick marks
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', 50 + numberRadius * Math.cos(angle));
+            text.setAttribute('y', 50 + numberRadius * Math.sin(angle));
+            text.setAttribute('class', 'analog-clock-number');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'central');
+            text.textContent = i;
+            svg.appendChild(text);
         }
 
         // Hour hand
