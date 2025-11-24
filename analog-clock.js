@@ -1,10 +1,11 @@
 /*
  * Analog Clock Web Component
  * A customizable analog clock that respects user preferences for color scheme and reduced motion.
+ * Uses a closed shadow DOM for encapsulation while remaining customizable via CSS custom properties.
  *
  * Usage: <analog-clock></analog-clock>
  *
- * CSS Custom Properties:
+ * CSS Custom Properties (set on the element or ancestor):
  * --analog-clock-size: Size of the clock (default: 200px)
  * --analog-clock-face-color: Background color of clock face
  * --analog-clock-border-color: Border color of clock
@@ -18,6 +19,9 @@
 class AnalogClock extends HTMLElement {
     constructor() {
         super();
+
+        // Create closed shadow DOM for encapsulation
+        this._shadow = this.attachShadow({ mode: 'closed' });
 
         // Track cumulative rotations to avoid backwards winding
         this._hourRotation = 0;
@@ -44,7 +48,60 @@ class AnalogClock extends HTMLElement {
     }
 
     _render() {
-        // Create SVG clock face - no shadow DOM for CSS customization
+        // Add styles to shadow DOM
+        const style = document.createElement('style');
+        style.textContent = `
+            :host {
+                display: inline-block;
+                width: var(--analog-clock-size, 200px);
+                height: var(--analog-clock-size, 200px);
+                color-scheme: light dark;
+            }
+
+            .analog-clock-svg {
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+
+            .analog-clock-face {
+                fill: var(--analog-clock-face-color, Canvas);
+                stroke: var(--analog-clock-border-color, currentColor);
+                stroke-width: var(--analog-clock-border-width, 2);
+            }
+
+            .analog-clock-tick {
+                stroke: var(--analog-clock-tick-color, currentColor);
+                stroke-width: 1.5;
+                stroke-linecap: round;
+            }
+
+            .analog-clock-hand {
+                stroke-linecap: round;
+            }
+
+            .analog-clock-hour-hand {
+                stroke: var(--analog-clock-hand-color, currentColor);
+                stroke-width: 3;
+            }
+
+            .analog-clock-minute-hand {
+                stroke: var(--analog-clock-hand-color, currentColor);
+                stroke-width: 2;
+            }
+
+            .analog-clock-second-hand {
+                stroke: var(--analog-clock-second-hand-color, currentColor);
+                stroke-width: 1;
+            }
+
+            .analog-clock-center {
+                fill: var(--analog-clock-center-color, currentColor);
+            }
+        `;
+        this._shadow.appendChild(style);
+
+        // Create SVG clock face
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '0 0 100 100');
         svg.setAttribute('class', 'analog-clock-svg');
@@ -112,7 +169,7 @@ class AnalogClock extends HTMLElement {
         center.setAttribute('class', 'analog-clock-center');
         svg.appendChild(center);
 
-        this.appendChild(svg);
+        this._shadow.appendChild(svg);
 
         // Initialize rotations based on current time
         this._initializeRotations();
@@ -247,57 +304,3 @@ class AnalogClock extends HTMLElement {
 
 // Register the custom element
 customElements.define('analog-clock', AnalogClock);
-
-// Default styles - can be overridden by external CSS
-const defaultStyles = document.createElement('style');
-defaultStyles.textContent = `
-    analog-clock {
-        display: inline-block;
-        width: var(--analog-clock-size, 200px);
-        height: var(--analog-clock-size, 200px);
-        color-scheme: light dark;
-    }
-
-    .analog-clock-svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-
-    .analog-clock-face {
-        fill: var(--analog-clock-face-color, Canvas);
-        stroke: var(--analog-clock-border-color, currentColor);
-        stroke-width: var(--analog-clock-border-width, 2);
-    }
-
-    .analog-clock-tick {
-        stroke: var(--analog-clock-tick-color, currentColor);
-        stroke-width: 1.5;
-        stroke-linecap: round;
-    }
-
-    .analog-clock-hand {
-        stroke-linecap: round;
-    }
-
-    .analog-clock-hour-hand {
-        stroke: var(--analog-clock-hand-color, currentColor);
-        stroke-width: 3;
-    }
-
-    .analog-clock-minute-hand {
-        stroke: var(--analog-clock-hand-color, currentColor);
-        stroke-width: 2;
-    }
-
-    .analog-clock-second-hand {
-        stroke: var(--analog-clock-second-hand-color, currentColor);
-        stroke-width: 1;
-    }
-
-    .analog-clock-center {
-        fill: var(--analog-clock-center-color, currentColor);
-    }
-`;
-
-document.head.appendChild(defaultStyles);
