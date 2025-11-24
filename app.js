@@ -7,6 +7,7 @@
     const displayTime = 350;
     const hideTime = 250;
     let loaded = false;
+    let appContainer = null;
 
     const stopLoadingMessage = () => {
         loaded = true;
@@ -47,7 +48,7 @@
     const registerServiceWorker = async () => {
         if ('serviceWorker' in navigator) {
             try {
-                const registration = await navigator.serviceWorker.register('sw.js');
+                const registration = await navigator.serviceWorker.register('/sw.js');
                 console.log('Service Worker registered successfully:', registration.scope);
             } catch (error) {
                 console.error('Service Worker registration failed:', error);
@@ -55,15 +56,184 @@
         }
     }
 
+    // Router functionality
+    const Router = {
+        routes: {},
+        currentView: null,
+
+        // Register a route
+        register: function(path, handler) {
+            this.routes[path] = handler;
+        },
+
+        // Navigate to a path
+        navigate: function(path) {
+            window.location.hash = path;
+        },
+
+        // Render current route
+        render: function() {
+            // Get hash without the # symbol, default to empty string
+            const hash = window.location.hash.slice(1) || '';
+
+            // Clear current view
+            if (this.currentView && this.currentView.destroy) {
+                this.currentView.destroy();
+            }
+            if (appContainer) {
+                appContainer.innerHTML = '';
+            }
+
+            // Check for component detail route
+            const componentMatch = hash.match(/^\/components\/([^/]+)$/);
+            if (componentMatch) {
+                const componentId = componentMatch[1];
+                this.routes['/components/:id'](componentId);
+                return;
+            }
+
+            // Check for gallery route
+            if (hash === '/gallery') {
+                this.routes['/gallery']();
+                return;
+            }
+
+            // Default to home route
+            if (this.routes['']) {
+                this.routes['']();
+            }
+        }
+    };
+
+    // Home view
+    Router.register('', function() {
+        Router.currentView = Home;
+        Home.render(appContainer);
+    });
+
+    // Gallery view
+    Router.register('/gallery', function() {
+        Router.currentView = Gallery;
+        Gallery.render(appContainer);
+    });
+
+    // Component detail view
+    Router.register('/components/:id', function(componentId) {
+        const components = Gallery.getComponents();
+        const component = components.find(c => c.id === componentId);
+
+        if (!component) {
+            // Component not found, redirect to gallery
+            Router.navigate('/');
+            return;
+        }
+
+        // Create component detail view
+        const detailView = document.createElement('div');
+        detailView.className = 'component-detail';
+
+        // Back button
+        const backBtn = document.createElement('a');
+        backBtn.href = '#/gallery';
+        backBtn.className = 'back-button';
+        backBtn.innerHTML = '&larr; Back to Gallery';
+        backBtn.style.textDecoration = 'none';
+
+        // Component header
+        const header = document.createElement('header');
+        header.className = 'component-detail-header';
+
+        const title = document.createElement('h1');
+        title.className = 'component-detail-title';
+        title.textContent = component.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'component-detail-meta';
+
+        const date = document.createElement('span');
+        date.className = 'component-detail-date';
+        date.textContent = `Added: ${new Date(component.dateAdded).toLocaleDateString()}`;
+
+        const tags = document.createElement('div');
+        tags.className = 'component-card-tags';
+        component.tags.forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'component-tag';
+            tagEl.textContent = tag;
+            tags.appendChild(tagEl);
+        });
+
+        meta.appendChild(date);
+        meta.appendChild(tags);
+
+        header.appendChild(title);
+        header.appendChild(meta);
+
+        // Component description
+        const description = document.createElement('p');
+        description.className = 'component-detail-description';
+        description.textContent = component.description;
+
+        // Demo section
+        const demoSection = document.createElement('section');
+        demoSection.className = 'component-demo-section';
+
+        const demoHeading = document.createElement('h2');
+        demoHeading.textContent = 'Demo';
+
+        const demoContainer = document.createElement('div');
+        demoContainer.className = 'component-demo';
+
+        // Add component demo based on ID
+        if (component.id === 'analog-clock') {
+            const clock = document.createElement('analog-clock');
+            demoContainer.appendChild(clock);
+        } else {
+            const placeholder = document.createElement('p');
+            placeholder.textContent = 'Component demo coming soon...';
+            demoContainer.appendChild(placeholder);
+        }
+
+        demoSection.appendChild(demoHeading);
+        demoSection.appendChild(demoContainer);
+
+        // Assemble the view
+        detailView.appendChild(backBtn);
+        detailView.appendChild(header);
+        detailView.appendChild(description);
+        detailView.appendChild(demoSection);
+
+        appContainer.appendChild(detailView);
+
+        Router.currentView = {
+            destroy: () => {
+                // Cleanup if needed
+            }
+        };
+    });
+
+    // Handle hash changes (browser back/forward buttons and direct hash changes)
+    window.addEventListener('hashchange', () => {
+        Router.render();
+    });
+
+    // Make router globally accessible for gallery
+    window.AppRouter = Router;
+
     // The application entrypoint.
     const startup = () => {
         displayLoading();
         registerServiceWorker();
 
-        // Initialize the gallery
+        // Create app container
+        appContainer = document.createElement('div');
+        appContainer.id = 'app';
+        body.appendChild(appContainer);
+
+        // Initialize the router
         setTimeout(() => {
             stopLoadingMessage();
-            Gallery.render(body);
+            Router.render();
         }, 1000);
     }
 

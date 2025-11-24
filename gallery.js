@@ -73,7 +73,8 @@ const Gallery = (function() {
 
     // Create a component card element
     const createComponentCard = (component, isFeatured = false) => {
-        const card = document.createElement('div');
+        const card = document.createElement('a');
+        card.href = `#/components/${component.id}`;
         card.className = isFeatured ? 'component-card featured' : 'component-card';
         card.dataset.id = component.id;
 
@@ -272,6 +273,13 @@ const Gallery = (function() {
         const gallery = document.createElement('div');
         gallery.className = 'gallery';
 
+        // Back to home button
+        const backBtn = document.createElement('a');
+        backBtn.href = '#';
+        backBtn.className = 'back-button';
+        backBtn.innerHTML = '&larr; Back to Home';
+        backBtn.style.textDecoration = 'none';
+
         const header = document.createElement('header');
         header.className = 'gallery-header';
 
@@ -286,6 +294,7 @@ const Gallery = (function() {
         header.appendChild(title);
         header.appendChild(subtitle);
 
+        gallery.appendChild(backBtn);
         gallery.appendChild(header);
 
         const carouselSection = createCarousel();
