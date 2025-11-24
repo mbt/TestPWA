@@ -6,6 +6,7 @@
 const ThemeToggle = (function() {
     const STORAGE_KEY = 'theme-preference';
     let toggleButton = null;
+    let systemThemeMediaQuery = null;
 
     // Get the current theme (from localStorage or system preference)
     const getCurrentTheme = () => {
@@ -22,9 +23,20 @@ const ThemeToggle = (function() {
         return 'dark';
     };
 
+    // Check if using manual override
+    const hasManualOverride = () => {
+        return localStorage.getItem(STORAGE_KEY) !== null;
+    };
+
     // Apply theme to document
     const applyTheme = (theme) => {
-        document.documentElement.setAttribute('data-theme', theme);
+        if (hasManualOverride()) {
+            // Use manual override
+            document.documentElement.setAttribute('data-theme', theme);
+        } else {
+            // No override - remove attribute to use system preference
+            document.documentElement.removeAttribute('data-theme');
+        }
         updateToggleButton(theme);
     };
 
@@ -38,6 +50,15 @@ const ThemeToggle = (function() {
         } else {
             toggleButton.innerHTML = '☀️'; // Sun for light mode option
             toggleButton.setAttribute('aria-label', 'Switch to light mode');
+        }
+    };
+
+    // Handle system theme changes
+    const handleSystemThemeChange = (e) => {
+        // Only respond to system changes if there's no manual override
+        if (!hasManualOverride()) {
+            const newTheme = e.matches ? 'light' : 'dark';
+            applyTheme(newTheme);
         }
     };
 
@@ -64,11 +85,27 @@ const ThemeToggle = (function() {
         document.body.appendChild(toggleButton);
     };
 
+    // Set up system theme change listener
+    const setupSystemThemeListener = () => {
+        if (window.matchMedia) {
+            systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+
+            // Modern browsers
+            if (systemThemeMediaQuery.addEventListener) {
+                systemThemeMediaQuery.addEventListener('change', handleSystemThemeChange);
+            } else if (systemThemeMediaQuery.addListener) {
+                // Older browsers
+                systemThemeMediaQuery.addListener(handleSystemThemeChange);
+            }
+        }
+    };
+
     // Initialize the theme system
     const init = () => {
         const theme = getCurrentTheme();
         applyTheme(theme);
         createToggleButton();
+        setupSystemThemeListener();
     };
 
     // Public API
