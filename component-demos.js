@@ -255,6 +255,35 @@ const ComponentDemos = (function() {
         noSecondsSection.appendChild(createCodeBlock('<digital-clock show-seconds="false"></digital-clock>'));
         container.appendChild(noSecondsSection);
 
+        // Blink Rate Variations
+        const blinkRateSection = createSection('Blink Rate Variations', []);
+
+        const clockSlow = document.createElement('digital-clock');
+        clockSlow.setAttribute('blink-rate', '0.25');
+        blinkRateSection.appendChild(createDemoContainer(clockSlow, 'Slow blink: 0.25 Hz (blinks every 4 seconds)'));
+        blinkRateSection.appendChild(createCodeBlock('<digital-clock blink-rate="0.25"></digital-clock>'));
+
+        const clockFast = document.createElement('digital-clock');
+        clockFast.setAttribute('blink-rate', '4');
+        blinkRateSection.appendChild(createDemoContainer(clockFast, 'Fast blink: 4 Hz (blinks 4 times per second)'));
+        blinkRateSection.appendChild(createCodeBlock('<digital-clock blink-rate="4"></digital-clock>'));
+
+        container.appendChild(blinkRateSection);
+
+        // Complete example with date
+        const completeSection = createSection('Complete Example', []);
+        const clockComplete = document.createElement('digital-clock');
+        clockComplete.setAttribute('format', '12');
+        clockComplete.setAttribute('show-date', 'true');
+        completeSection.appendChild(createDemoContainer(clockComplete, '12-hour format with date display'));
+        completeSection.appendChild(createCodeBlock(
+`<digital-clock
+    format="12"
+    show-date="true">
+</digital-clock>`
+        ));
+        container.appendChild(completeSection);
+
         // Customization
         const customSection = createSection('Customization', []);
         const customClock = document.createElement('digital-clock');
@@ -308,6 +337,12 @@ const ComponentDemos = (function() {
                     type: 'boolean',
                     default: 'true',
                     description: 'Whether the time separator blinks every second'
+                },
+                {
+                    name: 'blink-rate',
+                    type: 'number',
+                    default: '2',
+                    description: 'Blink frequency in Hz (times per second). For example: 0.25 = every 4 seconds, 2 = twice per second, 4 = four times per second'
                 }
             ])
         ]);
