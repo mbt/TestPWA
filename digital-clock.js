@@ -14,7 +14,7 @@
  * - blink-rate: Number - blink frequency in Hz (default: 1, meaning once per second)
  *
  * CSS Custom Properties (set on the element or ancestor):
- * --digital-clock-font-family: Font family (default: monospace)
+ * --digital-clock-font-family: Font family (default: 'American Typewriter', 'Courier New', Courier, Monaco, 'Lucida Console', monospace)
  * --digital-clock-font-size: Font size for time (default: 3rem)
  * --digital-clock-date-font-size: Font size for date (default: 1rem)
  * --digital-clock-text-color: Color of text
@@ -101,7 +101,7 @@ class DigitalClock extends HTMLElement {
         style.textContent = `
             :host {
                 display: inline-block;
-                font-family: var(--digital-clock-font-family, 'Courier New', Courier, monospace);
+                font-family: var(--digital-clock-font-family, 'American Typewriter', 'Courier New', Courier, Monaco, 'Lucida Console', monospace);
             }
 
             .clock-container {
@@ -138,13 +138,14 @@ class DigitalClock extends HTMLElement {
             .ampm {
                 font-size: 0.4em;
                 margin-left: 0.3em;
-                font-weight: normal;
+                font-weight: 700;
             }
 
             .date {
                 font-size: var(--digital-clock-date-font-size, 1rem);
                 color: var(--digital-clock-text-color, currentColor);
                 opacity: 0.8;
+                font-weight: 600;
             }
         `;
 

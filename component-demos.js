@@ -354,7 +354,7 @@ const ComponentDemos = (function() {
                 {
                     name: '--digital-clock-font-family',
                     type: 'font-family',
-                    default: 'monospace',
+                    default: "'American Typewriter', 'Courier New', monospace stack",
                     description: 'Font family for the clock'
                 },
                 {
