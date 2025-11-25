@@ -451,8 +451,8 @@ const ComponentDemos = (function() {
         basicUsage.appendChild(desc);
 
         const player1 = document.createElement('video-player-chapters');
-        player1.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
-        player1.setAttribute('poster', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23333" width="800" height="450"/%3E%3Ctext fill="%23fff" font-family="sans-serif" font-size="48" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EBig Buck Bunny%3C/text%3E%3C/svg%3E');
+        player1.setAttribute('src', 'test_video.mp4');
+        player1.setAttribute('poster', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23333" width="800" height="450"/%3E%3Ctext fill="%23fff" font-family="sans-serif" font-size="48" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EVideo Player w/ Chapters!%3C/text%3E%3C/svg%3E');
         const chapters = [
             {time: 0, title: "Opening Scene"},
             {time: 30, title: "Meet Big Buck"},
