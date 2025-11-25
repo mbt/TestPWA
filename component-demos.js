@@ -290,22 +290,22 @@ const ComponentDemos = (function() {
         customClock.setAttribute('format', '12');
         customClock.setAttribute('show-date', 'true');
         customClock.style.setProperty('--digital-clock-font-size', '4rem');
-        customClock.style.setProperty('--digital-clock-text-color', '#501464');
-        customClock.style.setProperty('--digital-clock-background-color', 'rgba(80, 20, 100, 0.1)');
-        customClock.style.setProperty('--digital-clock-border-color', '#501464');
-        customClock.style.setProperty('--digital-clock-border-width', '2px');
+        customClock.style.setProperty('--digital-clock-text-color', '#c084fc');
+        customClock.style.setProperty('--digital-clock-background-color', 'rgba(126, 34, 206, 0.15)');
+        customClock.style.setProperty('--digital-clock-border-color', '#a855f7');
+        customClock.style.setProperty('--digital-clock-border-width', '3px');
 
-        customSection.appendChild(createDemoContainer(customClock, 'Fully customized with CSS'));
+        customSection.appendChild(createDemoContainer(customClock, 'Fully customized with CSS - high contrast purple theme'));
         customSection.appendChild(createCodeBlock(
 `<digital-clock
     format="12"
     show-date="true"
     style="
         --digital-clock-font-size: 4rem;
-        --digital-clock-text-color: #501464;
-        --digital-clock-background-color: rgba(80, 20, 100, 0.1);
-        --digital-clock-border-color: #501464;
-        --digital-clock-border-width: 2px;
+        --digital-clock-text-color: #c084fc;
+        --digital-clock-background-color: rgba(126, 34, 206, 0.15);
+        --digital-clock-border-color: #a855f7;
+        --digital-clock-border-width: 3px;
     ">
 </digital-clock>`
         ));
