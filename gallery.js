@@ -4,8 +4,16 @@
  */
 
 const Gallery = (function() {
-    // Sample component data - will be replaced with real components
+    // Component registry - all Web Components in the gallery
     const components = [
+        {
+            id: 'digital-clock',
+            name: 'Digital Clock',
+            description: 'A customizable digital clock with 12/24-hour format, optional seconds and date display. Features blinking separator animation.',
+            dateAdded: '2025-11-24T00:00:00Z',
+            tags: ['time', 'utility', 'display'],
+            featured: true
+        },
         {
             id: 'analog-clock',
             name: 'Analog Clock',
@@ -13,46 +21,6 @@ const Gallery = (function() {
             dateAdded: '2025-11-24T00:00:00Z',
             tags: ['time', 'animation', 'interactive'],
             featured: true
-        },
-        {
-            id: 'example-button',
-            name: 'Example Button',
-            description: 'A customizable button component with various styles and states.',
-            dateAdded: '2025-01-15T00:00:00Z',
-            tags: ['form', 'input', 'interactive'],
-            featured: true
-        },
-        {
-            id: 'example-card',
-            name: 'Example Card',
-            description: 'A flexible card component for displaying content with optional header and footer.',
-            dateAdded: '2025-01-10T00:00:00Z',
-            tags: ['layout', 'container'],
-            featured: true
-        },
-        {
-            id: 'example-modal',
-            name: 'Example Modal',
-            description: 'A modal dialog component with customizable content and animations.',
-            dateAdded: '2025-01-05T00:00:00Z',
-            tags: ['overlay', 'dialog', 'interactive'],
-            featured: true
-        },
-        {
-            id: 'example-tabs',
-            name: 'Example Tabs',
-            description: 'A tabbed interface component for organizing content into sections.',
-            dateAdded: '2024-12-28T00:00:00Z',
-            tags: ['navigation', 'layout'],
-            featured: false
-        },
-        {
-            id: 'example-accordion',
-            name: 'Example Accordion',
-            description: 'An expandable/collapsible content component for FAQ-style layouts.',
-            dateAdded: '2024-12-20T00:00:00Z',
-            tags: ['layout', 'interactive'],
-            featured: false
         }
     ];
 

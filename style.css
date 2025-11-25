@@ -717,3 +717,201 @@ html[data-theme="light"] .theme-toggle:hover {
         font-size: 1.25rem;
     }
 }
+
+/* Component Documentation Styles */
+.component-documentation {
+    max-width: 100%;
+}
+
+.demo-section {
+    margin-bottom: 3rem;
+}
+
+.demo-section h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    color: var(--text-heading);
+    border-bottom: 2px solid var(--accent-primary);
+    padding-bottom: 0.5rem;
+}
+
+.demo-section p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.demo-container {
+    margin: 1.5rem 0;
+}
+
+.demo-description {
+    font-size: 0.95rem;
+    color: var(--text-tertiary);
+    margin-bottom: 0.75rem;
+    font-style: italic;
+}
+
+.demo-box {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    margin-bottom: 1rem;
+}
+
+.code-block {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.code-block code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    white-space: pre;
+}
+
+.property-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.property-table thead {
+    background-color: var(--bg-tertiary);
+}
+
+.property-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-heading);
+    border-bottom: 2px solid var(--border-medium);
+}
+
+.property-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    vertical-align: top;
+}
+
+.property-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.property-table tbody tr:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.property-table code {
+    background-color: var(--bg-elevated);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    color: var(--accent-text);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.feature-list li {
+    padding: 0.75rem 0;
+    padding-left: 2rem;
+    position: relative;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.feature-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .demo-box {
+        padding: 1.5rem;
+    }
+
+    .property-table {
+        font-size: 0.9rem;
+    }
+
+    .property-table th,
+    .property-table td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Make property tables scrollable on mobile */
+    .property-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .property-table thead,
+    .property-table tbody,
+    .property-table tr,
+    .property-table th,
+    .property-table td {
+        display: block;
+    }
+
+    .property-table thead {
+        display: none;
+    }
+
+    .property-table tr {
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 0.5rem;
+    }
+
+    .property-table td {
+        padding: 0.5rem;
+        border: none;
+        text-align: left;
+        white-space: normal;
+    }
+
+    .property-table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-heading);
+    }
+
+    .demo-box {
+        padding: 1rem;
+        min-height: 150px;
+    }
+
+    .code-block {
+        font-size: 0.85rem;
+    }
+}

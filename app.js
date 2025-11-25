@@ -174,28 +174,13 @@
         description.className = 'component-detail-description';
         description.textContent = component.description;
 
-        // Demo section
+        // Demo and Documentation section
         const demoSection = document.createElement('section');
         demoSection.className = 'component-demo-section';
 
-        const demoHeading = document.createElement('h2');
-        demoHeading.textContent = 'Demo';
-
-        const demoContainer = document.createElement('div');
-        demoContainer.className = 'component-demo';
-
-        // Add component demo based on ID
-        if (component.id === 'analog-clock') {
-            const clock = document.createElement('analog-clock');
-            demoContainer.appendChild(clock);
-        } else {
-            const placeholder = document.createElement('p');
-            placeholder.textContent = 'Component demo coming soon...';
-            demoContainer.appendChild(placeholder);
-        }
-
-        demoSection.appendChild(demoHeading);
-        demoSection.appendChild(demoContainer);
+        // Get comprehensive demo content from ComponentDemos module
+        const demoContent = ComponentDemos.getDemoContent(component.id);
+        demoSection.appendChild(demoContent);
 
         // Assemble the view
         detailView.appendChild(backBtn);
