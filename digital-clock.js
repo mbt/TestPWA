@@ -117,7 +117,7 @@ class DigitalClock extends HTMLElement {
 
             .time {
                 font-size: var(--digital-clock-font-size, 3rem);
-                font-weight: bold;
+                font-weight: normal;
                 color: var(--digital-clock-text-color, currentColor);
                 line-height: 1;
                 letter-spacing: 0.05em;
