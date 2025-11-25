@@ -4,10 +4,11 @@
  * and blinking colons. Respects user preferences for color scheme.
  * Uses a closed shadow DOM for encapsulation while remaining customizable via CSS custom properties.
  *
- * Usage: <digital-clock show-seconds blink-rate="2"></digital-clock>
+ * Usage: <digital-clock></digital-clock>
+ *        <digital-clock show-seconds="false"></digital-clock>
  *
  * Attributes:
- * show-seconds: Boolean attribute - display seconds if present
+ * show-seconds: "true" or "false" - display seconds (default: "true")
  * blink-rate: Number - blink frequency in Hz (default: 2, meaning blink every 500ms)
  *
  * CSS Custom Properties (set on the element or ancestor):
@@ -202,7 +203,9 @@ class DigitalClock extends HTMLElement {
     }
 
     _shouldShowSeconds() {
-        return this.hasAttribute('show-seconds');
+        // Show seconds by default, hide only if explicitly set to "false"
+        const attr = this.getAttribute('show-seconds');
+        return attr !== 'false';
     }
 
     _updateDisplay() {
