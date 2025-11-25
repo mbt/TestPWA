@@ -7,6 +7,14 @@ const Gallery = (function() {
     // Sample component data - will be replaced with real components
     const components = [
         {
+            id: 'digital-clock',
+            name: 'Digital Clock',
+            description: 'A customizable digital clock with optional seconds display and blinking colons. Configurable blink rate (default 2 Hz) and full CSS customization.',
+            dateAdded: '2025-11-25T00:00:00Z',
+            tags: ['time', 'display', 'interactive'],
+            featured: true
+        },
+        {
             id: 'analog-clock',
             name: 'Analog Clock',
             description: 'An animated analog clock with smooth hand movement. Respects reduced motion preferences and is fully customizable with CSS.',
