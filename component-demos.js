@@ -491,6 +491,38 @@ const ComponentDemos = (function() {
         ));
         container.appendChild(simpleFormat);
 
+        // WebVTT Track format
+        const webvttFormat = createSection('WebVTT Chapter Track (Auto-Detection)', []);
+        const player3 = document.createElement('video-player-chapters');
+        player3.setAttribute('src', 'test_video.mp4');
+
+        // Create and append track element
+        const track = document.createElement('track');
+        track.setAttribute('kind', 'chapters');
+        track.setAttribute('src', 'chapters.vtt');
+        track.setAttribute('default', '');
+        player3.appendChild(track);
+
+        webvttFormat.appendChild(createDemoContainer(player3, 'Automatically loads chapters from WebVTT track file'));
+        webvttFormat.appendChild(createCodeBlock(
+`<video-player-chapters src="video.mp4">
+  <track kind="chapters" src="chapters.vtt" default>
+</video-player-chapters>
+
+<!-- chapters.vtt format: -->
+WEBVTT
+
+00:00:00.000 --> 00:00:01.000
+Introduction
+
+00:00:01.000 --> 00:00:02.000
+Section 1
+
+00:00:02.000 --> 00:00:03.000
+Section 2`
+        ));
+        container.appendChild(webvttFormat);
+
         // Customization
         const customSection = createSection('Customization', []);
         const customPlayer = document.createElement('video-player-chapters');
@@ -605,6 +637,7 @@ const ComponentDemos = (function() {
         [
             'Custom video controls with play/pause, seek, and volume',
             'Chapter navigation via dropdown menu',
+            'Automatic chapter detection from WebVTT text tracks',
             'Progress bar with click-to-seek',
             'Time display showing current time and duration',
             'Automatic chapter tracking during playback',
@@ -612,7 +645,7 @@ const ComponentDemos = (function() {
             'Fully customizable with CSS custom properties',
             'Responsive design with mobile support',
             'Closed Shadow DOM for style encapsulation',
-            'Supports both JSON and simple string chapter formats'
+            'Supports JSON, simple string, and WebVTT chapter formats'
         ].forEach(feature => {
             const li = document.createElement('li');
             li.textContent = feature;

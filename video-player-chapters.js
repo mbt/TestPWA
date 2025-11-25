@@ -3,12 +3,24 @@
  * A customizable video player with chapter navigation via dropdown menu.
  * Uses a closed shadow DOM for encapsulation while remaining customizable via CSS custom properties.
  *
- * Usage: <video-player-chapters src="video.mp4"></video-player-chapters>
+ * Usage:
+ *
+ * With WebVTT chapter track (automatic detection):
+ * <video-player-chapters src="video.mp4">
+ *   <track kind="chapters" src="chapters.vtt">
+ * </video-player-chapters>
+ *
+ * With manual chapters attribute:
+ * <video-player-chapters src="video.mp4" chapters='[...]'></video-player-chapters>
  *
  * Attributes:
  * - src: URL of the video file (required)
  * - poster: URL of poster image (optional)
- * - chapters: JSON string or comma-separated list of chapters (optional)
+ * - chapters: JSON string or comma-separated list of chapters (optional, overrides track)
+ *
+ * Chapter Sources (priority order):
+ * 1. Manual 'chapters' attribute (if provided)
+ * 2. WebVTT text track with kind="chapters" (auto-detected)
  *
  * Chapter Format (JSON):
  * [
@@ -50,6 +62,7 @@ class VideoPlayerChapters extends HTMLElement {
     connectedCallback() {
         this._render();
         this._setupEventListeners();
+        this._detectChapterTracks();
         this._parseChapters();
     }
 
@@ -429,9 +442,81 @@ class VideoPlayerChapters extends HTMLElement {
         // Event listeners are automatically cleaned up when the element is removed
     }
 
+    _detectChapterTracks() {
+        // Check for <track kind="chapters"> elements in the light DOM
+        const trackElements = this.querySelectorAll('track[kind="chapters"]');
+
+        if (trackElements.length > 0) {
+            // Wait for video metadata to load before checking text tracks
+            this._video.addEventListener('loadedmetadata', () => {
+                this._loadChaptersFromTextTracks();
+            });
+        }
+
+        // Also listen for track changes
+        this._video.addEventListener('addtrack', () => {
+            this._loadChaptersFromTextTracks();
+        }, { once: true });
+    }
+
+    _loadChaptersFromTextTracks() {
+        // Only load from tracks if no manual chapters were provided
+        if (this.getAttribute('chapters')) {
+            return;
+        }
+
+        const textTracks = this._video.textTracks;
+
+        for (let i = 0; i < textTracks.length; i++) {
+            const track = textTracks[i];
+
+            if (track.kind === 'chapters') {
+                // Wait for track to load
+                if (track.cues && track.cues.length > 0) {
+                    this._parseChaptersFromTrack(track);
+                    return;
+                }
+
+                // Listen for cues to become available
+                track.addEventListener('load', () => {
+                    this._parseChaptersFromTrack(track);
+                });
+
+                // Set mode to hidden to ensure cues are loaded
+                track.mode = 'hidden';
+
+                return;
+            }
+        }
+    }
+
+    _parseChaptersFromTrack(track) {
+        const cues = track.cues;
+        if (!cues || cues.length === 0) return;
+
+        this._chapters = [];
+        for (let i = 0; i < cues.length; i++) {
+            const cue = cues[i];
+            this._chapters.push({
+                time: cue.startTime,
+                title: cue.text
+            });
+        }
+
+        // Sort chapters by time
+        this._chapters.sort((a, b) => a.time - b.time);
+        this._renderChapterMenu();
+    }
+
     _parseChapters() {
+        // Only parse attribute if chapters haven't already been loaded from tracks
+        if (this._chapters.length > 0) {
+            return;
+        }
+
         const chaptersAttr = this.getAttribute('chapters');
         if (!chaptersAttr) {
+            // No chapters attribute and no track chapters
             this._chapters = [];
             this._renderChapterMenu();
             return;
