@@ -439,6 +439,221 @@ const ComponentDemos = (function() {
         return container;
     };
 
+    // Video Player with Chapters Demo
+    const getVideoPlayerChaptersDemo = () => {
+        const container = document.createElement('div');
+        container.className = 'component-documentation';
+
+        // Basic Usage
+        const basicUsage = createSection('Basic Usage', []);
+        const desc = document.createElement('p');
+        desc.innerHTML = 'A video player with chapter navigation. You can provide a video source and chapters for quick seeking.';
+        basicUsage.appendChild(desc);
+
+        const player1 = document.createElement('video-player-chapters');
+        player1.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+        player1.setAttribute('poster', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23333" width="800" height="450"/%3E%3Ctext fill="%23fff" font-family="sans-serif" font-size="48" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EBig Buck Bunny%3C/text%3E%3C/svg%3E');
+        const chapters = [
+            {time: 0, title: "Opening Scene"},
+            {time: 30, title: "Meet Big Buck"},
+            {time: 60, title: "The Forest"},
+            {time: 120, title: "Adventures Begin"},
+            {time: 180, title: "Action Sequence"},
+            {time: 240, title: "Resolution"},
+            {time: 480, title: "Credits"}
+        ];
+        player1.setAttribute('chapters', JSON.stringify(chapters));
+
+        basicUsage.appendChild(createDemoContainer(player1, 'Video player with Big Buck Bunny sample video and chapters'));
+        basicUsage.appendChild(createCodeBlock(
+`<video-player-chapters
+    src="video.mp4"
+    poster="poster.jpg"
+    chapters='[
+        {"time": 0, "title": "Opening Scene"},
+        {"time": 30, "title": "Meet Big Buck"},
+        {"time": 60, "title": "The Forest"}
+    ]'>
+</video-player-chapters>`
+        ));
+        container.appendChild(basicUsage);
+
+        // Simple format
+        const simpleFormat = createSection('Simple Chapter Format', []);
+        const player2 = document.createElement('video-player-chapters');
+        player2.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4');
+        player2.setAttribute('chapters', '0:Introduction,30:The Dream Begins,120:In the Dream,300:Awakening,480:Conclusion');
+
+        simpleFormat.appendChild(createDemoContainer(player2, 'Using simple comma-separated chapter format'));
+        simpleFormat.appendChild(createCodeBlock(
+`<video-player-chapters
+    src="video.mp4"
+    chapters="0:Introduction,30:Main Content,120:Conclusion">
+</video-player-chapters>`
+        ));
+        container.appendChild(simpleFormat);
+
+        // Customization
+        const customSection = createSection('Customization', []);
+        const customPlayer = document.createElement('video-player-chapters');
+        customPlayer.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4');
+        customPlayer.style.setProperty('--video-player-max-width', '600px');
+        customPlayer.style.setProperty('--video-player-controls-bg', 'rgba(80, 20, 100, 0.9)');
+        customPlayer.style.setProperty('--video-player-controls-color', '#f0e6ff');
+        customPlayer.style.setProperty('--video-player-button-hover', 'rgba(160, 80, 200, 0.3)');
+        customPlayer.style.setProperty('--video-player-dropdown-bg', 'rgba(80, 20, 100, 0.95)');
+        customPlayer.setAttribute('chapters', '0:Start,10:Middle,20:End');
+
+        customSection.appendChild(createDemoContainer(customPlayer, 'Custom purple theme'));
+        customSection.appendChild(createCodeBlock(
+`<video-player-chapters
+    src="video.mp4"
+    chapters="0:Start,10:Middle,20:End"
+    style="
+        --video-player-max-width: 600px;
+        --video-player-controls-bg: rgba(80, 20, 100, 0.9);
+        --video-player-controls-color: #f0e6ff;
+        --video-player-button-hover: rgba(160, 80, 200, 0.3);
+        --video-player-dropdown-bg: rgba(80, 20, 100, 0.95);
+    ">
+</video-player-chapters>`
+        ));
+        container.appendChild(customSection);
+
+        // Attributes
+        const attributesSection = createSection('Attributes', [
+            createPropertyTable([
+                {
+                    name: 'src',
+                    type: 'string',
+                    default: 'required',
+                    description: 'URL of the video file'
+                },
+                {
+                    name: 'poster',
+                    type: 'string',
+                    default: 'optional',
+                    description: 'URL of poster image displayed before playback'
+                },
+                {
+                    name: 'chapters',
+                    type: 'JSON | string',
+                    default: 'optional',
+                    description: 'Chapter data as JSON array or comma-separated string'
+                }
+            ])
+        ]);
+        container.appendChild(attributesSection);
+
+        // CSS Custom Properties
+        const propsSection = createSection('CSS Custom Properties', [
+            createPropertyTable([
+                {
+                    name: '--video-player-width',
+                    type: 'length',
+                    default: '100%',
+                    description: 'Width of the player'
+                },
+                {
+                    name: '--video-player-max-width',
+                    type: 'length',
+                    default: '800px',
+                    description: 'Maximum width of the player'
+                },
+                {
+                    name: '--video-player-background',
+                    type: 'color',
+                    default: '#000',
+                    description: 'Background color of player'
+                },
+                {
+                    name: '--video-player-controls-bg',
+                    type: 'color',
+                    default: 'rgba(0,0,0,0.7)',
+                    description: 'Controls background color'
+                },
+                {
+                    name: '--video-player-controls-color',
+                    type: 'color',
+                    default: '#fff',
+                    description: 'Controls text color'
+                },
+                {
+                    name: '--video-player-button-hover',
+                    type: 'color',
+                    default: 'rgba(255,255,255,0.2)',
+                    description: 'Button hover background'
+                },
+                {
+                    name: '--video-player-dropdown-bg',
+                    type: 'color',
+                    default: 'rgba(0,0,0,0.9)',
+                    description: 'Chapter dropdown background'
+                },
+                {
+                    name: '--video-player-dropdown-hover',
+                    type: 'color',
+                    default: 'rgba(255,255,255,0.1)',
+                    description: 'Chapter item hover background'
+                }
+            ])
+        ]);
+        container.appendChild(propsSection);
+
+        // Features
+        const featuresSection = createSection('Features', []);
+        const featuresList = document.createElement('ul');
+        featuresList.className = 'feature-list';
+        [
+            'Custom video controls with play/pause, seek, and volume',
+            'Chapter navigation via dropdown menu',
+            'Progress bar with click-to-seek',
+            'Time display showing current time and duration',
+            'Automatic chapter tracking during playback',
+            'Keyboard shortcuts (Space/K: play/pause, Arrow keys: seek, M: mute)',
+            'Fully customizable with CSS custom properties',
+            'Responsive design with mobile support',
+            'Closed Shadow DOM for style encapsulation',
+            'Supports both JSON and simple string chapter formats'
+        ].forEach(feature => {
+            const li = document.createElement('li');
+            li.textContent = feature;
+            featuresList.appendChild(li);
+        });
+        featuresSection.appendChild(featuresList);
+        container.appendChild(featuresSection);
+
+        // API Methods
+        const apiSection = createSection('JavaScript API', []);
+        const apiList = document.createElement('ul');
+        apiList.className = 'feature-list';
+        [
+            'play() - Start video playback',
+            'pause() - Pause video playback',
+            'seekToTime(seconds) - Seek to specific time',
+            'setChapters(chapters) - Update chapters dynamically'
+        ].forEach(method => {
+            const li = document.createElement('li');
+            const code = document.createElement('code');
+            code.textContent = method;
+            li.appendChild(code);
+            apiList.appendChild(li);
+        });
+        apiSection.appendChild(apiList);
+        apiSection.appendChild(createCodeBlock(
+`const player = document.querySelector('video-player-chapters');
+player.play();
+player.seekToTime(30);
+player.setChapters([
+    {time: 0, title: "New Chapter 1"},
+    {time: 60, title: "New Chapter 2"}
+]);`, 'javascript'
+        ));
+        container.appendChild(apiSection);
+
+        return container;
+    };
+
     // Public API - returns demo content for a given component ID
     const getDemoContent = (componentId) => {
         switch (componentId) {
@@ -446,6 +661,8 @@ const ComponentDemos = (function() {
                 return getAnalogClockDemo();
             case 'digital-clock':
                 return getDigitalClockDemo();
+            case 'video-player-chapters':
+                return getVideoPlayerChaptersDemo();
             default:
                 const placeholder = document.createElement('p');
                 placeholder.textContent = 'Component demo coming soon...';
