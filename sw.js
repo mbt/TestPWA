@@ -2,7 +2,7 @@
  * Our service worker.
  */
 
-const CACHE_NAME = 'testpwa-v17';
+const CACHE_NAME = 'testpwa-v18';
 const urlsToCache = [
     '.',
     'index.html',
@@ -12,6 +12,8 @@ const urlsToCache = [
     'gallery.js',
     'digital-clock.js',
     'analog-clock.js',
+    'video-player-chapters.js',
+    'component-demos.js',
     'style.css',
     'application.webmanifest',
     'icons/app_32.png',

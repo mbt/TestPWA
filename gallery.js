@@ -7,6 +7,14 @@ const Gallery = (function() {
     // Sample component data - will be replaced with real components
     const components = [
         {
+            id: 'video-player-chapters',
+            name: 'Video Player with Chapters',
+            description: 'A fully-featured video player with chapter navigation via dropdown menu. Includes custom controls, progress bar, volume slider, and keyboard shortcuts.',
+            dateAdded: '2025-11-25T12:00:00Z',
+            tags: ['media', 'video', 'interactive', 'navigation'],
+            featured: true
+        },
+        {
             id: 'digital-clock',
             name: 'Digital Clock',
             description: 'A customizable digital clock with optional seconds display and blinking colons. Configurable blink rate (default 2 Hz) and full CSS customization.',
