@@ -452,27 +452,25 @@ const ComponentDemos = (function() {
 
         const player1 = document.createElement('video-player-chapters');
         player1.setAttribute('src', 'test_video.mp4');
-        player1.setAttribute('poster', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23333" width="800" height="450"/%3E%3Ctext fill="%23fff" font-family="sans-serif" font-size="48" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EVideo Player w/ Chapters!%3C/text%3E%3C/svg%3E');
+        player1.setAttribute('poster', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%23333" width="800" height="450"/%3E%3Ctext fill="%23fff" font-family="sans-serif" font-size="48" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ETest Video%3C/text%3E%3C/svg%3E');
         const chapters = [
-            {time: 0, title: "Opening Scene"},
-            {time: 30, title: "Meet Big Buck"},
-            {time: 60, title: "The Forest"},
-            {time: 120, title: "Adventures Begin"},
-            {time: 180, title: "Action Sequence"},
-            {time: 240, title: "Resolution"},
-            {time: 480, title: "Credits"}
+            {time: 0, title: "Introduction"},
+            {time: 1, title: "Section 1"},
+            {time: 2, title: "Section 2"},
+            {time: 3, title: "Section 3"},
+            {time: 4, title: "Conclusion"}
         ];
         player1.setAttribute('chapters', JSON.stringify(chapters));
 
-        basicUsage.appendChild(createDemoContainer(player1, 'Video player with Big Buck Bunny sample video and chapters'));
+        basicUsage.appendChild(createDemoContainer(player1, 'Video player with local test video and chapters'));
         basicUsage.appendChild(createCodeBlock(
 `<video-player-chapters
     src="video.mp4"
     poster="poster.jpg"
     chapters='[
-        {"time": 0, "title": "Opening Scene"},
-        {"time": 30, "title": "Meet Big Buck"},
-        {"time": 60, "title": "The Forest"}
+        {"time": 0, "title": "Introduction"},
+        {"time": 1, "title": "Section 1"},
+        {"time": 2, "title": "Section 2"}
     ]'>
 </video-player-chapters>`
         ));
@@ -481,14 +479,14 @@ const ComponentDemos = (function() {
         // Simple format
         const simpleFormat = createSection('Simple Chapter Format', []);
         const player2 = document.createElement('video-player-chapters');
-        player2.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4');
-        player2.setAttribute('chapters', '0:Introduction,30:The Dream Begins,120:In the Dream,300:Awakening,480:Conclusion');
+        player2.setAttribute('src', 'test_video.mp4');
+        player2.setAttribute('chapters', '0:Start,1:Middle,3:End');
 
         simpleFormat.appendChild(createDemoContainer(player2, 'Using simple comma-separated chapter format'));
         simpleFormat.appendChild(createCodeBlock(
 `<video-player-chapters
     src="video.mp4"
-    chapters="0:Introduction,30:Main Content,120:Conclusion">
+    chapters="0:Start,1:Middle,3:End">
 </video-player-chapters>`
         ));
         container.appendChild(simpleFormat);
@@ -496,19 +494,19 @@ const ComponentDemos = (function() {
         // Customization
         const customSection = createSection('Customization', []);
         const customPlayer = document.createElement('video-player-chapters');
-        customPlayer.setAttribute('src', 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4');
+        customPlayer.setAttribute('src', 'test_video.mp4');
         customPlayer.style.setProperty('--video-player-max-width', '600px');
         customPlayer.style.setProperty('--video-player-controls-bg', 'rgba(80, 20, 100, 0.9)');
         customPlayer.style.setProperty('--video-player-controls-color', '#f0e6ff');
         customPlayer.style.setProperty('--video-player-button-hover', 'rgba(160, 80, 200, 0.3)');
         customPlayer.style.setProperty('--video-player-dropdown-bg', 'rgba(80, 20, 100, 0.95)');
-        customPlayer.setAttribute('chapters', '0:Start,10:Middle,20:End');
+        customPlayer.setAttribute('chapters', '0:Start,2:Middle,4:End');
 
         customSection.appendChild(createDemoContainer(customPlayer, 'Custom purple theme'));
         customSection.appendChild(createCodeBlock(
 `<video-player-chapters
     src="video.mp4"
-    chapters="0:Start,10:Middle,20:End"
+    chapters="0:Start,2:Middle,4:End"
     style="
         --video-player-max-width: 600px;
         --video-player-controls-bg: rgba(80, 20, 100, 0.9);
