@@ -12,16 +12,19 @@ A Progressive Web Application serving as a toolbox and gallery for Web Component
 - **Routing**: Hash-based routing (#/home, #/gallery)
 
 ## Key Files
-- `index.html` - Single entry point
+- `index.html` - Single entry point with all script imports
 - `app.js` - Main application bootstrap and hash-based routing
 - `home.js` - Landing page module
-- `gallery.js` - Web Components gallery module
+- `gallery.js` - Web Components gallery module with carousel and component list
+- `component-demos.js` - Comprehensive documentation and demos for each component
 - `theme-toggle.js` - Light/dark mode toggle with localStorage persistence
 - `style.css` - Global styles with CSS custom properties
 - `sw.js` - Service Worker for offline support (cache-first)
 
 ## Web Components
-- `analog-clock.js` - Customizable analog clock with Shadow DOM encapsulation
+- `video-player-chapters.js` - Video player with chapter navigation, custom controls, and keyboard shortcuts
+- `digital-clock.js` - Digital clock with configurable format, blinking colons, and customizable blink rate
+- `analog-clock.js` - Analog clock with smooth animated hands and reduced motion support
 
 ## Theme System
 
@@ -75,25 +78,35 @@ Each component entry should include:
    - Maintain alphabetical or logical grouping
 
 3. **Register in `gallery.js`**
-   - Add entry to the `components` array (lines 8-57)
+   - Add entry to the `components` array (around lines 8-70)
    - Include ALL required fields:
      - `id`: matches custom element tag name
      - `name`: display name
      - `description`: what it does
-     - `dateAdded`: ISO date string (today's date)
+     - `dateAdded`: ISO date string (today's date in format '2025-11-25T00:00:00Z')
      - `tags`: array of relevant categories
-     - `featured`: true/false (max 5 featured total)
+     - `featured`: true/false (max 5 featured total - currently at 6, needs cleanup)
 
 4. **Update Service Worker `sw.js`**
    - Add component file to `urlsToCache` array
-   - Increment `CACHE_NAME` version (e.g., `testpwa-v10` → `testpwa-v11`)
+   - Increment `CACHE_NAME` version (current: `testpwa-v18`, increment to `testpwa-v19`)
+   - Add any media assets (videos, images) to cache if needed
    - This ensures offline functionality
 
-5. **Test the integration**
+5. **Add component demo in `component-demos.js`**
+   - Create a `get[ComponentName]Demo()` function following existing patterns
+   - Include: basic usage, variations, customization examples, attributes table, CSS properties table
+   - Add case to `getDemoContent()` switch statement
+   - Use helper functions: `createSection()`, `createDemoContainer()`, `createCodeBlock()`, `createPropertyTable()`
+
+6. **Test the integration**
    - Check gallery displays the component card
-   - Verify featured carousel if `featured: true`
-   - Confirm component loads and renders
+   - Verify featured carousel if `featured: true` (max 5 components)
+   - Confirm component loads and renders on demo page
+   - Test component demo page at `#/components/{component-id}`
    - Test offline functionality (Service Worker cache)
+   - Verify all customization examples work
+   - Check keyboard/accessibility features if applicable
 
 ### Example Component Registration:
 
@@ -114,10 +127,13 @@ Each component entry should include:
 - ❌ Creating component file but not loading in `index.html`
 - ❌ Loading in `index.html` but not registering in `gallery.js`
 - ❌ Registering in gallery but forgetting to update `sw.js`
+- ❌ Forgetting to add demo function in `component-demos.js`
 - ❌ Using wrong `id` (must match custom element tag name)
 - ❌ Missing required fields in component data
 - ❌ Not incrementing Service Worker cache version
 - ❌ More than 5 components marked as `featured: true`
+- ❌ Not adding media assets (videos, images) to Service Worker cache
+- ❌ Date format not in ISO format (must be: '2025-11-25T00:00:00Z')
 
 ## Development Notes
 - All DOM is built dynamically by JavaScript
@@ -126,6 +142,24 @@ Each component entry should include:
 - Web Components use closed Shadow DOM for encapsulation
 - Components customizable via CSS custom properties
 - Hash-based routing pattern: `#/home`, `#/gallery`, `#/components/{id}`
+- Demo pages show live examples with code snippets
+- Current Service Worker version: v18 (increment when adding components)
+- Media files (like test_video.mp4) should be added to Service Worker cache
+
+## Current Component Status
+**Implemented (3 components):**
+- ✅ video-player-chapters (Featured)
+- ✅ digital-clock (Featured)
+- ✅ analog-clock (Featured)
+
+**Placeholder/Example components (5 components):**
+- 🔲 example-button (Featured - needs implementation)
+- 🔲 example-card (Featured - needs implementation)
+- 🔲 example-modal (Featured - needs implementation)
+- 🔲 example-tabs (Not featured)
+- 🔲 example-accordion (Not featured)
+
+**Note:** Currently 6 components marked as `featured: true` but max is 5. Need to adjust when implementing real components.
 
 ## Commands
 - Development: Open in browser or use dev container
