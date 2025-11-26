@@ -19,16 +19,30 @@ const Home = (function() {
 
         const tagline = document.createElement('p');
         tagline.className = 'home-tagline';
-        tagline.textContent = 'A collection of reusable, framework-free Web Components for modern web development';
+        tagline.textContent = 'A collection of reusable, framework-free Web Components and AI prompts for modern web development';
 
-        const cta = document.createElement('a');
-        cta.href = '#/gallery';
-        cta.className = 'home-cta';
-        cta.textContent = 'Explore Components';
+        const ctaContainer = document.createElement('div');
+        ctaContainer.style.display = 'flex';
+        ctaContainer.style.gap = '1rem';
+        ctaContainer.style.justifyContent = 'center';
+        ctaContainer.style.flexWrap = 'wrap';
+
+        const componentCta = document.createElement('a');
+        componentCta.href = '#/gallery';
+        componentCta.className = 'home-cta';
+        componentCta.textContent = 'Explore Components';
+
+        const promptCta = document.createElement('a');
+        promptCta.href = '#/prompts';
+        promptCta.className = 'home-cta';
+        promptCta.textContent = 'Browse Prompts';
+
+        ctaContainer.appendChild(componentCta);
+        ctaContainer.appendChild(promptCta);
 
         hero.appendChild(title);
         hero.appendChild(tagline);
-        hero.appendChild(cta);
+        hero.appendChild(ctaContainer);
 
         // Features section
         const features = document.createElement('section');
