@@ -92,6 +92,20 @@
                 return;
             }
 
+            // Check for prompt detail/edit route
+            const promptMatch = hash.match(/^\/prompts\/([^/]+)$/);
+            if (promptMatch) {
+                const promptId = promptMatch[1];
+                this.routes['/prompts/:id'](promptId);
+                return;
+            }
+
+            // Check for prompts gallery route
+            if (hash === '/prompts') {
+                this.routes['/prompts']();
+                return;
+            }
+
             // Check for gallery route
             if (hash === '/gallery') {
                 this.routes['/gallery']();
@@ -195,6 +209,18 @@
                 // Cleanup if needed
             }
         };
+    });
+
+    // Prompt Gallery view
+    Router.register('/prompts', function() {
+        Router.currentView = PromptGallery;
+        PromptGallery.render();
+    });
+
+    // Prompt detail view
+    Router.register('/prompts/:id', function(promptId) {
+        Router.currentView = PromptDetail;
+        PromptDetail.render(promptId);
     });
 
     // Handle hash changes (browser back/forward buttons and direct hash changes)
