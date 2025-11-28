@@ -287,34 +287,62 @@ const KnowledgeBaseDetail = (function() {
     };
 
     const showUploadDialog = () => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
-        };
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog';
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal';
+        const form = document.createElement('form');
+        form.method = 'dialog';
+        form.className = 'kb-form';
+
+        const contentForm = document.createElement('div');
+        contentForm.className = 'kb-form-content';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
+        modalHeader.className = 'kb-dialog-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Upload Document';
         modalHeader.appendChild(modalTitle);
 
-        const form = document.createElement('form');
-        form.className = 'kb-form';
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const file = formData.get('file');
+        contentForm.innerHTML = `
+            <div class="form-group">
+                <label for="doc-file">File *</label>
+                <input type="file" id="doc-file" name="file" required accept=".txt,.md,.json,.xml,.csv,.html,.css,.js,.py,.java,.c,.cpp,.h,.hpp">
+                <small>Supported: Text, Markdown, JSON, XML, CSV, HTML, CSS, JavaScript, Python, Java, C/C++</small>
+            </div>
+            <div class="form-group">
+                <label for="doc-tags">Tags</label>
+                <input type="text" id="doc-tags" name="tags" placeholder="e.g., api, documentation, reference (comma-separated)">
+            </div>
+            <div class="kb-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="upload-btn">Upload</button>
+            </div>
+        `;
+
+        form.appendChild(modalHeader);
+        form.appendChild(contentForm);
+        dialog.appendChild(form);
+        document.body.appendChild(dialog);
+
+        // Handle cancel
+        dialog.querySelector('#cancel-btn').onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
+
+        // Handle upload
+        dialog.querySelector('#upload-btn').onclick = async () => {
+            const formData = new FormData();
+            const fileInput = document.getElementById('doc-file');
+            const file = fileInput.files[0];
 
             if (!file || file.size === 0) {
                 alert('Please select a file to upload');
                 return;
             }
+
+            formData.append('file', file);
+            formData.append('tags', document.getElementById('doc-tags').value);
 
             try {
                 const content = await readFileAsText(file);
@@ -336,6 +364,7 @@ const KnowledgeBaseDetail = (function() {
                     }
                 });
 
+                dialog.close();
                 dialog.remove();
                 await render(knowledgeBase.id);
             } catch (error) {
@@ -344,50 +373,61 @@ const KnowledgeBaseDetail = (function() {
             }
         };
 
-        form.innerHTML = `
+        dialog.showModal();
+    };
+
+    const showTextDocumentDialog = () => {
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog kb-dialog-large';
+
+        const form = document.createElement('form');
+        form.method = 'dialog';
+        form.className = 'kb-form';
+
+        const contentForm = document.createElement('div');
+        contentForm.className = 'kb-form-content';
+
+        const modalHeader = document.createElement('div');
+        modalHeader.className = 'kb-dialog-header';
+        const modalTitle = document.createElement('h2');
+        modalTitle.textContent = 'Create Text Document';
+        modalHeader.appendChild(modalTitle);
+
+        contentForm.innerHTML = `
             <div class="form-group">
-                <label for="doc-file">File *</label>
-                <input type="file" id="doc-file" name="file" required accept=".txt,.md,.json,.xml,.csv,.html,.css,.js,.py,.java,.c,.cpp,.h,.hpp">
-                <small>Supported: Text, Markdown, JSON, XML, CSV, HTML, CSS, JavaScript, Python, Java, C/C++</small>
+                <label for="doc-name">Document Name *</label>
+                <input type="text" id="doc-name" name="name" required placeholder="e.g., API Reference.md">
+            </div>
+            <div class="form-group">
+                <label for="doc-content">Content * (Markdown supported)</label>
+                <markdown-editor
+                    id="doc-content"
+                    placeholder="Enter the document content here... You can use Markdown formatting."
+                ></markdown-editor>
             </div>
             <div class="form-group">
                 <label for="doc-tags">Tags</label>
                 <input type="text" id="doc-tags" name="tags" placeholder="e.g., api, documentation, reference (comma-separated)">
             </div>
-            <div class="kb-modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Upload</button>
+            <div class="kb-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="create-btn">Create Document</button>
             </div>
         `;
 
-        modal.appendChild(modalHeader);
-        modal.appendChild(form);
-        dialog.appendChild(modal);
+        form.appendChild(modalHeader);
+        form.appendChild(contentForm);
+        dialog.appendChild(form);
         document.body.appendChild(dialog);
-    };
 
-    const showTextDocumentDialog = () => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
+        // Handle cancel
+        dialog.querySelector('#cancel-btn').onclick = () => {
+            dialog.close();
+            dialog.remove();
         };
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal kb-modal-large';
-
-        const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
-        const modalTitle = document.createElement('h2');
-        modalTitle.textContent = 'Create Text Document';
-        modalHeader.appendChild(modalTitle);
-
-        const form = document.createElement('form');
-        form.className = 'kb-form';
-        form.onsubmit = async (e) => {
-            e.preventDefault();
+        // Handle create
+        dialog.querySelector('#create-btn').onclick = async () => {
             const formData = new FormData(form);
             const contentEditor = document.getElementById('doc-content');
             const content = contentEditor ? contentEditor.value : '';
@@ -416,6 +456,7 @@ const KnowledgeBaseDetail = (function() {
                     }
                 });
 
+                dialog.close();
                 dialog.remove();
                 await render(knowledgeBase.id);
             } catch (error) {
@@ -424,32 +465,7 @@ const KnowledgeBaseDetail = (function() {
             }
         };
 
-        form.innerHTML = `
-            <div class="form-group">
-                <label for="doc-name">Document Name *</label>
-                <input type="text" id="doc-name" name="name" required placeholder="e.g., API Reference.md">
-            </div>
-            <div class="form-group">
-                <label for="doc-content">Content * (Markdown supported)</label>
-                <markdown-editor
-                    id="doc-content"
-                    placeholder="Enter the document content here... You can use Markdown formatting."
-                ></markdown-editor>
-            </div>
-            <div class="form-group">
-                <label for="doc-tags">Tags</label>
-                <input type="text" id="doc-tags" name="tags" placeholder="e.g., api, documentation, reference (comma-separated)">
-            </div>
-            <div class="kb-modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Document</button>
-            </div>
-        `;
-
-        modal.appendChild(modalHeader);
-        modal.appendChild(form);
-        dialog.appendChild(modal);
-        document.body.appendChild(dialog);
+        dialog.showModal();
 
         // Focus the name input
         setTimeout(() => {
@@ -458,27 +474,58 @@ const KnowledgeBaseDetail = (function() {
     };
 
     const showEditDocumentDialog = (doc) => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
-        };
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog kb-dialog-large';
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal kb-modal-large';
+        const form = document.createElement('form');
+        form.method = 'dialog';
+        form.className = 'kb-form';
+
+        const contentForm = document.createElement('div');
+        contentForm.className = 'kb-form-content';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
+        modalHeader.className = 'kb-dialog-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Edit Document';
         modalHeader.appendChild(modalTitle);
 
-        const form = document.createElement('form');
-        form.className = 'kb-form';
-        form.onsubmit = async (e) => {
-            e.preventDefault();
+        contentForm.innerHTML = `
+            <div class="form-group">
+                <label for="doc-name">Document Name *</label>
+                <input type="text" id="doc-name" name="name" required value="${escapeHtml(doc.name)}">
+            </div>
+            <div class="form-group">
+                <label for="doc-content">Content * (Markdown supported)</label>
+                <markdown-editor
+                    id="doc-content"
+                    placeholder="Enter the document content here... You can use Markdown formatting."
+                    value="${escapeHtml(doc.content)}"
+                ></markdown-editor>
+            </div>
+            <div class="form-group">
+                <label for="doc-tags">Tags</label>
+                <input type="text" id="doc-tags" name="tags" value="${escapeHtml((doc.tags || []).join(', '))}">
+            </div>
+            <div class="kb-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-btn">Save Changes</button>
+            </div>
+        `;
+
+        form.appendChild(modalHeader);
+        form.appendChild(contentForm);
+        dialog.appendChild(form);
+        document.body.appendChild(dialog);
+
+        // Handle cancel
+        dialog.querySelector('#cancel-btn').onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
+
+        // Handle save
+        dialog.querySelector('#save-btn').onclick = async () => {
             const formData = new FormData(form);
             const contentEditor = document.getElementById('doc-content');
             const content = contentEditor ? contentEditor.value : '';
@@ -497,6 +544,7 @@ const KnowledgeBaseDetail = (function() {
                     tags: tags
                 });
 
+                dialog.close();
                 dialog.remove();
                 await render(knowledgeBase.id);
             } catch (error) {
@@ -505,33 +553,7 @@ const KnowledgeBaseDetail = (function() {
             }
         };
 
-        form.innerHTML = `
-            <div class="form-group">
-                <label for="doc-name">Document Name *</label>
-                <input type="text" id="doc-name" name="name" required value="${escapeHtml(doc.name)}">
-            </div>
-            <div class="form-group">
-                <label for="doc-content">Content * (Markdown supported)</label>
-                <markdown-editor
-                    id="doc-content"
-                    placeholder="Enter the document content here... You can use Markdown formatting."
-                    value="${escapeHtml(doc.content)}"
-                ></markdown-editor>
-            </div>
-            <div class="form-group">
-                <label for="doc-tags">Tags</label>
-                <input type="text" id="doc-tags" name="tags" value="${escapeHtml((doc.tags || []).join(', '))}">
-            </div>
-            <div class="kb-modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        `;
-
-        modal.appendChild(modalHeader);
-        modal.appendChild(form);
-        dialog.appendChild(modal);
-        document.body.appendChild(dialog);
+        dialog.showModal();
 
         // Focus the name input
         setTimeout(() => {
@@ -540,19 +562,14 @@ const KnowledgeBaseDetail = (function() {
     };
 
     const showDocumentViewer = (doc) => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
-        };
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog kb-dialog-large';
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal kb-modal-large';
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'kb-form-content';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
+        modalHeader.className = 'kb-dialog-header';
 
         const titleGroup = document.createElement('div');
         const modalTitle = document.createElement('h2');
@@ -567,9 +584,12 @@ const KnowledgeBaseDetail = (function() {
         titleGroup.appendChild(modalMeta);
 
         const closeBtn = document.createElement('button');
-        closeBtn.className = 'kb-modal-close-btn';
+        closeBtn.className = 'kb-dialog-close-btn';
         closeBtn.innerHTML = '×';
-        closeBtn.onclick = () => dialog.remove();
+        closeBtn.onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
 
         modalHeader.appendChild(titleGroup);
         modalHeader.appendChild(closeBtn);
@@ -581,7 +601,7 @@ const KnowledgeBaseDetail = (function() {
         content.appendChild(pre);
 
         const actions = document.createElement('div');
-        actions.className = 'kb-modal-actions';
+        actions.className = 'kb-dialog-actions';
 
         const copyBtn = document.createElement('button');
         copyBtn.className = 'btn btn-secondary';
@@ -603,16 +623,20 @@ const KnowledgeBaseDetail = (function() {
         const closeActionBtn = document.createElement('button');
         closeActionBtn.className = 'btn btn-primary';
         closeActionBtn.textContent = 'Close';
-        closeActionBtn.onclick = () => dialog.remove();
+        closeActionBtn.onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
 
         actions.appendChild(copyBtn);
         actions.appendChild(closeActionBtn);
 
-        modal.appendChild(modalHeader);
-        modal.appendChild(content);
-        modal.appendChild(actions);
-        dialog.appendChild(modal);
+        contentWrapper.appendChild(modalHeader);
+        contentWrapper.appendChild(content);
+        contentWrapper.appendChild(actions);
+        dialog.appendChild(contentWrapper);
         document.body.appendChild(dialog);
+        dialog.showModal();
     };
 
     const deleteDocument = async (doc) => {
