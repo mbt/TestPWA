@@ -109,6 +109,20 @@
                 return;
             }
 
+            // Check for knowledge bases gallery route
+            if (hash === '/knowledge-bases') {
+                this.routes['/knowledge-bases']();
+                return;
+            }
+
+            // Check for knowledge base detail route
+            const kbMatch = hash.match(/^\/knowledge-bases\/([^/]+)$/);
+            if (kbMatch) {
+                const kbId = kbMatch[1];
+                this.routes['/knowledge-bases/:id'](kbId);
+                return;
+            }
+
             // Check for gallery route
             if (hash === '/gallery') {
                 this.routes['/gallery']();
@@ -226,6 +240,18 @@
         PromptDetail.render(promptId);
     });
 
+    // Knowledge Bases view
+    Router.register('/knowledge-bases', function() {
+        Router.currentView = KnowledgeBasesGallery;
+        KnowledgeBasesGallery.render();
+    });
+
+    // Knowledge Base detail view
+    Router.register('/knowledge-bases/:id', function(kbId) {
+        Router.currentView = KnowledgeBaseDetail;
+        KnowledgeBaseDetail.render(kbId);
+    });
+
     // Handle hash changes (browser back/forward buttons and direct hash changes)
     window.addEventListener('hashchange', () => {
         Router.render();
@@ -238,6 +264,15 @@
     const startup = () => {
         displayLoading();
         registerServiceWorker();
+
+        // Initialize Knowledge Base database
+        KnowledgeBaseDB.init()
+            .then(() => {
+                console.log('Knowledge Base database initialized');
+            })
+            .catch((error) => {
+                console.error('Failed to initialize Knowledge Base database:', error);
+            });
 
         // Create app container
         appContainer = document.createElement('div');

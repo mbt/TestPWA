@@ -2,12 +2,14 @@
  * Our service worker.
  */
 
-const CACHE_NAME = 'testpwa-v19';
+const CACHE_NAME = 'testpwa-v20';
 const urlsToCache = [
     '.',
     'index.html',
     'app.js',
     'theme-toggle.js',
+    'font-size-control.js',
+    'online-offline-status.js',
     'home.js',
     'gallery.js',
     'digital-clock.js',
@@ -17,6 +19,9 @@ const urlsToCache = [
     'component-demos.js',
     'prompts.js',
     'prompt-detail.js',
+    'knowledge-base-db.js',
+    'knowledge-bases.js',
+    'knowledge-base-detail.js',
     'style.css',
     'application.webmanifest',
     'icons/app_32.png',
