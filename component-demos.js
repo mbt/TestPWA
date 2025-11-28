@@ -341,8 +341,8 @@ const ComponentDemos = (function() {
                 {
                     name: 'blink-rate',
                     type: 'number',
-                    default: '2',
-                    description: 'Blink frequency in Hz (times per second). For example: 0.25 = every 4 seconds, 2 = twice per second, 4 = four times per second'
+                    default: '1',
+                    description: 'Blink frequency in Hz (times per second). For example: 0.25 = every 4 seconds, 1 = once per second, 2 = twice per second, 4 = four times per second'
                 }
             ])
         ]);

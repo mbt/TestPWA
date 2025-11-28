@@ -474,15 +474,33 @@ const PromptDetail = (function() {
             e.preventDefault();
 
             const promptData = {
-                title: document.getElementById('prompt-title').value,
+                title: document.getElementById('prompt-title').value.trim(),
                 modelFamily: document.getElementById('prompt-model-family').value,
                 category: document.getElementById('prompt-category').value,
-                description: document.getElementById('prompt-description').value,
-                prompt: document.getElementById('prompt-text').value
+                description: document.getElementById('prompt-description').value.trim(),
+                prompt: document.getElementById('prompt-text').value.trim()
             };
 
+            // Validate required fields
             if (!promptData.title || !promptData.prompt) {
                 alert('Please fill in all required fields (Title and Prompt)');
+                return;
+            }
+
+            // Validate title length
+            if (promptData.title.length < 3) {
+                alert('Title must be at least 3 characters long');
+                return;
+            }
+
+            if (promptData.title.length > 200) {
+                alert('Title must be less than 200 characters');
+                return;
+            }
+
+            // Validate prompt length
+            if (promptData.prompt.length < 10) {
+                alert('Prompt text must be at least 10 characters long');
                 return;
             }
 
@@ -506,16 +524,51 @@ const PromptDetail = (function() {
         });
     }
 
+    // HTML escape function to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Validate URL to prevent XSS via javascript: protocol
+    function isSafeUrl(url) {
+        if (!url) return false;
+        const trimmed = url.trim().toLowerCase();
+        // Allow http, https, mailto, and relative URLs
+        return trimmed.startsWith('http://') ||
+               trimmed.startsWith('https://') ||
+               trimmed.startsWith('mailto:') ||
+               trimmed.startsWith('/') ||
+               trimmed.startsWith('./') ||
+               trimmed.startsWith('../') ||
+               trimmed.startsWith('#');
+    }
+
     function renderMarkdown(text) {
         if (!text) return '';
 
-        let html = text;
+        // First, escape HTML to prevent injection
+        let html = escapeHtml(text);
 
-        // Images
-        html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" />');
+        // Now apply markdown transformations on escaped text
+        // Images - validate URLs
+        html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, url) => {
+            const decodedUrl = url.replace(/&amp;/g, '&');
+            if (isSafeUrl(decodedUrl)) {
+                return `<img src="${decodedUrl}" alt="${alt}" />`;
+            }
+            return `[Image: ${alt}]`;
+        });
 
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // Links - validate URLs
+        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (match, text, url) => {
+            const decodedUrl = url.replace(/&amp;/g, '&');
+            if (isSafeUrl(decodedUrl)) {
+                return `<a href="${decodedUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            }
+            return text;
+        });
 
         // Headers
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
@@ -538,7 +591,7 @@ const PromptDetail = (function() {
 
         // Blockquotes
         html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
-        html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+        html = html.replace(/^&amp;gt; (.*$)/gim, '<blockquote>$1</blockquote>');
 
         // Line breaks
         html = html.replace(/\n\n/g, '</p><p>');
