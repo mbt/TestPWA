@@ -180,7 +180,7 @@ const KnowledgeBasesGallery = (function() {
 
     const showCreateDialog = () => {
         const dialog = document.createElement('div');
-        dialog.className = 'modal-overlay';
+        dialog.className = 'kb-modal-overlay';
         dialog.onclick = (e) => {
             if (e.target === dialog) {
                 dialog.remove();
@@ -188,10 +188,10 @@ const KnowledgeBasesGallery = (function() {
         };
 
         const modal = document.createElement('div');
-        modal.className = 'modal';
+        modal.className = 'kb-modal';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'modal-header';
+        modalHeader.className = 'kb-modal-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Create Knowledge Base';
         modalHeader.appendChild(modalTitle);
@@ -201,6 +201,8 @@ const KnowledgeBasesGallery = (function() {
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
+            const descEditor = document.getElementById('kb-description');
+            const description = descEditor ? descEditor.value : '';
             const tags = formData.get('tags')
                 .split(',')
                 .map(t => t.trim())
@@ -209,7 +211,7 @@ const KnowledgeBasesGallery = (function() {
             try {
                 await KnowledgeBaseDB.createKnowledgeBase({
                     name: formData.get('name'),
-                    description: formData.get('description'),
+                    description: description,
                     tags
                 });
                 dialog.remove();
@@ -226,15 +228,18 @@ const KnowledgeBasesGallery = (function() {
                 <input type="text" id="kb-name" name="name" required placeholder="e.g., Technical Documentation">
             </div>
             <div class="form-group">
-                <label for="kb-description">Description</label>
-                <textarea id="kb-description" name="description" rows="3" placeholder="Describe the purpose of this knowledge base..."></textarea>
+                <label for="kb-description">Description (Markdown supported)</label>
+                <markdown-editor
+                    id="kb-description"
+                    placeholder="Describe the purpose of this knowledge base..."
+                ></markdown-editor>
             </div>
             <div class="form-group">
                 <label for="kb-tags">Tags</label>
                 <input type="text" id="kb-tags" name="tags" placeholder="e.g., technical, api, guides (comma-separated)">
             </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+            <div class="kb-modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create</button>
             </div>
         `;
@@ -252,7 +257,7 @@ const KnowledgeBasesGallery = (function() {
 
     const showEditDialog = (kb) => {
         const dialog = document.createElement('div');
-        dialog.className = 'modal-overlay';
+        dialog.className = 'kb-modal-overlay';
         dialog.onclick = (e) => {
             if (e.target === dialog) {
                 dialog.remove();
@@ -260,10 +265,10 @@ const KnowledgeBasesGallery = (function() {
         };
 
         const modal = document.createElement('div');
-        modal.className = 'modal';
+        modal.className = 'kb-modal';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'modal-header';
+        modalHeader.className = 'kb-modal-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Edit Knowledge Base';
         modalHeader.appendChild(modalTitle);
@@ -273,6 +278,8 @@ const KnowledgeBasesGallery = (function() {
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
+            const descEditor = document.getElementById('kb-description');
+            const description = descEditor ? descEditor.value : '';
             const tags = formData.get('tags')
                 .split(',')
                 .map(t => t.trim())
@@ -281,7 +288,7 @@ const KnowledgeBasesGallery = (function() {
             try {
                 await KnowledgeBaseDB.updateKnowledgeBase(kb.id, {
                     name: formData.get('name'),
-                    description: formData.get('description'),
+                    description: description,
                     tags
                 });
                 dialog.remove();
@@ -298,15 +305,19 @@ const KnowledgeBasesGallery = (function() {
                 <input type="text" id="kb-name" name="name" required value="${escapeHtml(kb.name)}">
             </div>
             <div class="form-group">
-                <label for="kb-description">Description</label>
-                <textarea id="kb-description" name="description" rows="3">${escapeHtml(kb.description || '')}</textarea>
+                <label for="kb-description">Description (Markdown supported)</label>
+                <markdown-editor
+                    id="kb-description"
+                    placeholder="Describe the purpose of this knowledge base..."
+                    value="${escapeHtml(kb.description || '')}"
+                ></markdown-editor>
             </div>
             <div class="form-group">
                 <label for="kb-tags">Tags</label>
                 <input type="text" id="kb-tags" name="tags" value="${escapeHtml((kb.tags || []).join(', '))}">
             </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+            <div class="kb-modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         `;
