@@ -3,9 +3,12 @@
  */
 
 (function() {
+    // Constants
+    const LOADING_DISPLAY_TIME = 350; // ms
+    const LOADING_HIDE_TIME = 250; // ms
+    const STARTUP_DELAY = 1000; // ms
+
     const body = document.getElementsByTagName('body')[0];
-    const displayTime = 350;
-    const hideTime = 250;
     let loaded = false;
     let appContainer = null;
 
@@ -24,7 +27,7 @@
 
         // Only continue the loop if not loaded
         if (!loaded) {
-            setTimeout(displayLoading, hideTime);
+            setTimeout(displayLoading, LOADING_HIDE_TIME);
         }
     }
 
@@ -41,7 +44,7 @@
         msgLoading.innerText = 'Application is loading, please wait...';
 
         body.appendChild(msgLoading);
-        setTimeout(removeLoading, displayTime);
+        setTimeout(removeLoading, LOADING_DISPLAY_TIME);
     }
 
     // Register service worker for PWA functionality
@@ -245,7 +248,7 @@
         setTimeout(() => {
             stopLoadingMessage();
             Router.render();
-        }, 1000);
+        }, STARTUP_DELAY);
     }
 
     // Call startup when DOM is ready

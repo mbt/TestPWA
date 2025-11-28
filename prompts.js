@@ -3,7 +3,7 @@ const PromptGallery = (function() {
     const STORAGE_KEY = 'prompt-gallery-data';
 
     // Model families and categories
-    const MODEL_FAMILIES = ['Claude', 'Kimi', 'MiniMax'];
+    const MODEL_FAMILIES = ['Claude', 'Kimi', 'MiniMax', 'Generic'];
     const CATEGORIES = [
         'Entertainment',
         'Programming',

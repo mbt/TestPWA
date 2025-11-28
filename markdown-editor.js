@@ -303,16 +303,50 @@ class MarkdownEditor extends HTMLElement {
         this.previewContainer.innerHTML = this.parseMarkdown(markdown);
     }
 
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    isSafeUrl(url) {
+        if (!url) return false;
+        const trimmed = url.trim().toLowerCase();
+        // Allow http, https, mailto, data (for images), and relative URLs
+        return trimmed.startsWith('http://') ||
+               trimmed.startsWith('https://') ||
+               trimmed.startsWith('mailto:') ||
+               trimmed.startsWith('data:image/') ||
+               trimmed.startsWith('/') ||
+               trimmed.startsWith('./') ||
+               trimmed.startsWith('../') ||
+               trimmed.startsWith('#');
+    }
+
     parseMarkdown(text) {
         if (!text) return '<p style="color: var(--text-secondary, rgb(160, 160, 160));">Nothing to preview yet...</p>';
 
-        let html = text;
+        // First, escape HTML to prevent injection
+        let html = this.escapeHtml(text);
 
-        // Images
-        html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1" />');
+        // Now apply markdown transformations on escaped text
+        // Images - validate URLs
+        html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, (match, alt, url) => {
+            const decodedUrl = url.replace(/&amp;/g, '&');
+            if (this.isSafeUrl(decodedUrl)) {
+                return `<img src="${decodedUrl}" alt="${alt}" />`;
+            }
+            return `[Image: ${alt}]`;
+        });
 
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2">$1</a>');
+        // Links - validate URLs
+        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (match, text, url) => {
+            const decodedUrl = url.replace(/&amp;/g, '&');
+            if (this.isSafeUrl(decodedUrl)) {
+                return `<a href="${decodedUrl}" rel="noopener noreferrer">${text}</a>`;
+            }
+            return text;
+        });
 
         // Headers
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
@@ -335,6 +369,7 @@ class MarkdownEditor extends HTMLElement {
 
         // Blockquotes
         html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
+        html = html.replace(/^&amp;gt; (.*$)/gim, '<blockquote>$1</blockquote>');
 
         // Line breaks
         html = html.replace(/\n\n/g, '</p><p>');
@@ -375,10 +410,16 @@ class MarkdownEditor extends HTMLElement {
                 break;
 
             case 'link':
-                const url = prompt('Enter URL:');
+                const url = prompt('Enter URL (must start with http://, https://, mailto:, or /):');
                 if (url) {
-                    newText = `[${selectedText || 'link text'}](${url})`;
-                    cursorOffset = newText.length;
+                    // Validate URL before inserting
+                    if (this.isSafeUrl(url)) {
+                        newText = `[${selectedText || 'link text'}](${url})`;
+                        cursorOffset = newText.length;
+                    } else {
+                        alert('Invalid URL. Please use http://, https://, mailto:, or relative paths starting with /');
+                        return;
+                    }
                 }
                 break;
 
@@ -427,10 +468,28 @@ class MarkdownEditor extends HTMLElement {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            this.fileInput.value = '';
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            alert('Image file is too large. Maximum size is 5MB.');
+            this.fileInput.value = '';
+            return;
+        }
+
         const reader = new FileReader();
+
         reader.onload = (event) => {
             const dataUrl = event.target.result;
-            const altText = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+            // Sanitize filename - remove extension and escape special characters
+            let altText = file.name.replace(/\.[^/.]+$/, '');
+            altText = altText.replace(/[<>'"&]/g, ''); // Remove potentially problematic characters
 
             const start = this.textarea.selectionStart;
             const beforeText = this.textarea.value.substring(0, start);
@@ -450,6 +509,12 @@ class MarkdownEditor extends HTMLElement {
             }));
 
             // Reset file input
+            this.fileInput.value = '';
+        };
+
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+            alert('Failed to read image file. Please try again.');
             this.fileInput.value = '';
         };
 

@@ -4,6 +4,9 @@
  */
 
 const Gallery = (function() {
+    // Constants
+    const CAROUSEL_INTERVAL_MS = 5000; // Carousel auto-advance interval
+
     // Sample component data - will be replaced with real components
     const components = [
         {
@@ -191,7 +194,7 @@ const Gallery = (function() {
 
     // Start carousel autoplay
     const startCarouselAutoplay = () => {
-        carouselInterval = setInterval(nextSlide, 5000);
+        carouselInterval = setInterval(nextSlide, CAROUSEL_INTERVAL_MS);
     };
 
     // Stop carousel autoplay
