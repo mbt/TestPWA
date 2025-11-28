@@ -522,7 +522,7 @@ Remember: Never just give answers - help the student discover them!`,
                     </div>
                 </div>
 
-                <div class="prompt-grid">
+                <div class="prompt-grid" id="prompt-grid">
                     ${filtered.length === 0 ? `
                         <div class="empty-state">
                             <p>No prompts found matching your filters.</p>
@@ -564,14 +564,89 @@ Remember: Never just give answers - help the student discover them!`,
         attachEventListeners(currentFilters, currentSort, currentReverse);
     }
 
+    // Update only the prompt grid without re-rendering the entire page
+    function updatePromptGrid() {
+        const savedFilters = JSON.parse(localStorage.getItem('prompt-filters') || '{}');
+        const currentFilters = {
+            modelFamily: savedFilters.modelFamily || 'all',
+            category: savedFilters.category || 'all',
+            showDeprecated: savedFilters.showDeprecated !== false,
+            searchText: savedFilters.searchText || ''
+        };
+        const currentSort = savedFilters.sortBy || 'dateAdded';
+        const currentReverse = savedFilters.reverse || false;
+
+        const filtered = getPromptsSorted(currentFilters, currentSort, currentReverse);
+        const gridContainer = document.getElementById('prompt-grid');
+
+        if (!gridContainer) return;
+
+        gridContainer.innerHTML = filtered.length === 0 ? `
+            <div class="empty-state">
+                <p>No prompts found matching your filters.</p>
+                <button class="btn btn-primary" id="add-first-prompt">
+                    Add Your First Prompt
+                </button>
+            </div>
+        ` : filtered.map(prompt => `
+            <div class="prompt-card ${prompt.deprecated ? 'deprecated' : ''}"
+                 data-id="${prompt.id}">
+                <div class="prompt-card-header">
+                    <h3>${prompt.title}</h3>
+                    ${prompt.deprecated ? '<span class="badge deprecated">Deprecated</span>' : ''}
+                </div>
+                <p class="prompt-description">${prompt.description}</p>
+                <div class="prompt-meta">
+                    <span class="badge model-family">${prompt.modelFamily}</span>
+                    <span class="badge category">${prompt.category}</span>
+                    ${prompt.reviews.length > 0 ? `
+                        <span class="review-count">⭐ ${prompt.reviews.length} reviews</span>
+                    ` : ''}
+                </div>
+                <div class="prompt-footer">
+                    <span class="date">
+                        ${new Date(prompt.dateModified).toLocaleDateString()}
+                    </span>
+                    <button class="btn btn-sm" data-action="view" data-id="${prompt.id}">
+                        View
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Re-attach event listeners for the new grid items
+        const viewButtons = gridContainer.querySelectorAll('[data-action="view"]');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                window.location.hash = `#/prompts/${id}`;
+            });
+        });
+
+        const cards = gridContainer.querySelectorAll('.prompt-card');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('button')) {
+                    const id = card.dataset.id;
+                    window.location.hash = `#/prompts/${id}`;
+                }
+            });
+        });
+
+        // Re-attach add first prompt button if it exists
+        document.getElementById('add-first-prompt')?.addEventListener('click', () => {
+            window.location.hash = '#/prompts/new';
+        });
+    }
+
     function attachEventListeners(currentFilters, currentSort, currentReverse) {
-        // Search
+        // Search - only update grid, don't re-render entire page
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 currentFilters.searchText = e.target.value;
                 saveFilters(currentFilters, currentSort, currentReverse);
-                render();
+                updatePromptGrid(); // Changed from render() to updatePromptGrid()
             });
         }
 
