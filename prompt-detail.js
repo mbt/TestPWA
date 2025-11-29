@@ -575,13 +575,17 @@ const PromptDetail = (function() {
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
         html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-        // Bold
-        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+        // Bold + Italic (***text*** or ___text___)
+        html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        html = html.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
 
-        // Italic
-        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-        html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+        // Bold (**text** or __text__)
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+        // Italic (*text* or _text_)
+        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        html = html.replace(/_(.+?)_/g, '<em>$1</em>');
 
         // Code blocks
         html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');

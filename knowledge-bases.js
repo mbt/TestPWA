@@ -179,50 +179,23 @@ const KnowledgeBasesGallery = (function() {
     };
 
     const showCreateDialog = () => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
-        };
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog';
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal';
+        const form = document.createElement('form');
+        form.method = 'dialog';
+        form.className = 'kb-form';
+
+        const contentForm = document.createElement('div');
+        contentForm.className = 'kb-form-content';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
+        modalHeader.className = 'kb-dialog-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Create Knowledge Base';
         modalHeader.appendChild(modalTitle);
 
-        const form = document.createElement('form');
-        form.className = 'kb-form';
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const descEditor = document.getElementById('kb-description');
-            const description = descEditor ? descEditor.value : '';
-            const tags = formData.get('tags')
-                .split(',')
-                .map(t => t.trim())
-                .filter(t => t);
-
-            try {
-                await KnowledgeBaseDB.createKnowledgeBase({
-                    name: formData.get('name'),
-                    description: description,
-                    tags
-                });
-                dialog.remove();
-                render();
-            } catch (error) {
-                console.error('Failed to create knowledge base:', error);
-                alert('Failed to create knowledge base. Please try again.');
-            }
-        };
-
-        form.innerHTML = `
+        contentForm.innerHTML = `
             <div class="form-group">
                 <label for="kb-name">Name *</label>
                 <input type="text" id="kb-name" name="name" required placeholder="e.g., Technical Documentation">
@@ -238,16 +211,57 @@ const KnowledgeBasesGallery = (function() {
                 <label for="kb-tags">Tags</label>
                 <input type="text" id="kb-tags" name="tags" placeholder="e.g., technical, api, guides (comma-separated)">
             </div>
-            <div class="kb-modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create</button>
+            <div class="kb-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="create-btn">Create</button>
             </div>
         `;
 
-        modal.appendChild(modalHeader);
-        modal.appendChild(form);
-        dialog.appendChild(modal);
+        form.appendChild(modalHeader);
+        form.appendChild(contentForm);
+        dialog.appendChild(form);
         document.body.appendChild(dialog);
+
+        // Handle cancel
+        dialog.querySelector('#cancel-btn').onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
+
+        // Handle create
+        dialog.querySelector('#create-btn').onclick = async () => {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('kb-name').value);
+            formData.append('tags', document.getElementById('kb-tags').value);
+
+            const descEditor = document.getElementById('kb-description');
+            const description = descEditor ? descEditor.value : '';
+            const tags = formData.get('tags')
+                .split(',')
+                .map(t => t.trim())
+                .filter(t => t);
+
+            if (!formData.get('name')) {
+                alert('Please provide a name');
+                return;
+            }
+
+            try {
+                await KnowledgeBaseDB.createKnowledgeBase({
+                    name: formData.get('name'),
+                    description: description,
+                    tags
+                });
+                dialog.close();
+                dialog.remove();
+                render();
+            } catch (error) {
+                console.error('Failed to create knowledge base:', error);
+                alert('Failed to create knowledge base. Please try again.');
+            }
+        };
+
+        dialog.showModal();
 
         // Focus the name input
         setTimeout(() => {
@@ -256,50 +270,23 @@ const KnowledgeBasesGallery = (function() {
     };
 
     const showEditDialog = (kb) => {
-        const dialog = document.createElement('div');
-        dialog.className = 'kb-modal-overlay';
-        dialog.onclick = (e) => {
-            if (e.target === dialog) {
-                dialog.remove();
-            }
-        };
+        const dialog = document.createElement('dialog');
+        dialog.className = 'kb-dialog';
 
-        const modal = document.createElement('div');
-        modal.className = 'kb-modal';
+        const form = document.createElement('form');
+        form.method = 'dialog';
+        form.className = 'kb-form';
+
+        const contentForm = document.createElement('div');
+        contentForm.className = 'kb-form-content';
 
         const modalHeader = document.createElement('div');
-        modalHeader.className = 'kb-modal-header';
+        modalHeader.className = 'kb-dialog-header';
         const modalTitle = document.createElement('h2');
         modalTitle.textContent = 'Edit Knowledge Base';
         modalHeader.appendChild(modalTitle);
 
-        const form = document.createElement('form');
-        form.className = 'kb-form';
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const descEditor = document.getElementById('kb-description');
-            const description = descEditor ? descEditor.value : '';
-            const tags = formData.get('tags')
-                .split(',')
-                .map(t => t.trim())
-                .filter(t => t);
-
-            try {
-                await KnowledgeBaseDB.updateKnowledgeBase(kb.id, {
-                    name: formData.get('name'),
-                    description: description,
-                    tags
-                });
-                dialog.remove();
-                render();
-            } catch (error) {
-                console.error('Failed to update knowledge base:', error);
-                alert('Failed to update knowledge base. Please try again.');
-            }
-        };
-
-        form.innerHTML = `
+        contentForm.innerHTML = `
             <div class="form-group">
                 <label for="kb-name">Name *</label>
                 <input type="text" id="kb-name" name="name" required value="${escapeHtml(kb.name)}">
@@ -316,16 +303,57 @@ const KnowledgeBasesGallery = (function() {
                 <label for="kb-tags">Tags</label>
                 <input type="text" id="kb-tags" name="tags" value="${escapeHtml((kb.tags || []).join(', '))}">
             </div>
-            <div class="kb-modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="this.closest('.kb-modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+            <div class="kb-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-btn">Save Changes</button>
             </div>
         `;
 
-        modal.appendChild(modalHeader);
-        modal.appendChild(form);
-        dialog.appendChild(modal);
+        form.appendChild(modalHeader);
+        form.appendChild(contentForm);
+        dialog.appendChild(form);
         document.body.appendChild(dialog);
+
+        // Handle cancel
+        dialog.querySelector('#cancel-btn').onclick = () => {
+            dialog.close();
+            dialog.remove();
+        };
+
+        // Handle save
+        dialog.querySelector('#save-btn').onclick = async () => {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('kb-name').value);
+            formData.append('tags', document.getElementById('kb-tags').value);
+
+            const descEditor = document.getElementById('kb-description');
+            const description = descEditor ? descEditor.value : '';
+            const tags = formData.get('tags')
+                .split(',')
+                .map(t => t.trim())
+                .filter(t => t);
+
+            if (!formData.get('name')) {
+                alert('Please provide a name');
+                return;
+            }
+
+            try {
+                await KnowledgeBaseDB.updateKnowledgeBase(kb.id, {
+                    name: formData.get('name'),
+                    description: description,
+                    tags
+                });
+                dialog.close();
+                dialog.remove();
+                render();
+            } catch (error) {
+                console.error('Failed to update knowledge base:', error);
+                alert('Failed to update knowledge base. Please try again.');
+            }
+        };
+
+        dialog.showModal();
 
         // Focus the name input
         setTimeout(() => {
