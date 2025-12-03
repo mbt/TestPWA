@@ -198,32 +198,54 @@ const OllamaService = (function() {
     };
 
     // Send a chat request
-    const chat = async (model, messages, options = {}, onChunk = null) => {
+    const chat = async (model, messages, options = {}, onChunk = null, tools = null, format = null) => {
+        const payload = {
+            model,
+            messages,
+            options,
+            stream: true
+        };
+
+        // Add tools if provided
+        if (tools && tools.length > 0) {
+            payload.tools = tools;
+        }
+
+        // Add format if provided
+        if (format) {
+            payload.format = format;
+        }
+
         await sendMessage({
             type: 'chat',
-            payload: {
-                model,
-                messages,
-                options,
-                stream: true
-            }
+            payload
         });
 
         // Register handler for responses
         let fullResponse = '';
+        let toolCalls = [];
+
         const unsubscribe = registerMessageHandler('chat', (message) => {
             if (message.type === 'chat_response') {
                 const chunk = message.payload;
+
+                // Handle text content
                 if (chunk.message && chunk.message.content) {
                     fullResponse += chunk.message.content;
-                    if (onChunk) {
-                        onChunk(chunk, fullResponse);
-                    }
+                }
+
+                // Handle tool calls
+                if (chunk.message && chunk.message.tool_calls) {
+                    toolCalls = chunk.message.tool_calls;
+                }
+
+                if (onChunk) {
+                    onChunk(chunk, fullResponse, false, toolCalls);
                 }
             } else if (message.type === 'chat_complete') {
                 unsubscribe();
                 if (onChunk) {
-                    onChunk(message.payload, fullResponse, true);
+                    onChunk(message.payload, fullResponse, true, toolCalls);
                 }
             }
         });

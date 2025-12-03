@@ -162,7 +162,7 @@ const ConversationsGallery = (function() {
             });
 
             // Navigate to the new conversation
-            Router.navigate(`#/conversations/${conversation.id}`);
+            window.AppRouter.navigate(`#/conversations/${conversation.id}`);
         } catch (error) {
             console.error('Failed to create conversation:', error);
             alert('Failed to create conversation');
@@ -210,7 +210,7 @@ const ConversationsGallery = (function() {
 
                 switch (action) {
                     case 'open':
-                        Router.navigate(`#/conversations/${id}`);
+                        window.AppRouter.navigate(`#/conversations/${id}`);
                         break;
                     case 'delete':
                         await deleteConversation(id);
@@ -223,7 +223,7 @@ const ConversationsGallery = (function() {
                 const card = e.target.closest('.conversation-card');
                 if (card && !e.target.closest('button')) {
                     const id = card.dataset.id;
-                    Router.navigate(`#/conversations/${id}`);
+                    window.AppRouter.navigate(`#/conversations/${id}`);
                 }
             });
         }

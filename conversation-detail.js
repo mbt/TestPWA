@@ -10,6 +10,8 @@ const ConversationDetail = (function() {
     let isGenerating = false;
     let currentMessageId = null;
     let availableModels = [];
+    let selectedImages = []; // Array of {data: base64, preview: url} objects
+    let enableTools = true; // Enable/disable tools for conversation
 
     // Initialize the module
     async function init(id) {
@@ -18,7 +20,7 @@ const ConversationDetail = (function() {
         try {
             const data = await ConversationDB.getConversationWithMessages(conversationId);
             if (!data) {
-                Router.navigate('#/conversations');
+                window.AppRouter.navigate('#/conversations');
                 return false;
             }
 
@@ -42,7 +44,7 @@ const ConversationDetail = (function() {
             return true;
         } catch (error) {
             console.error('Failed to load conversation:', error);
-            Router.navigate('#/conversations');
+            window.AppRouter.navigate('#/conversations');
             return false;
         }
     }
@@ -82,6 +84,19 @@ const ConversationDetail = (function() {
                 </div>
 
                 <div class="input-container">
+                    <div id="image-previews" class="image-previews"></div>
+                    <div class="input-actions">
+                        <button class="btn btn-icon" id="image-upload-btn" title="Upload image" ${isGenerating ? 'disabled' : ''}>
+                            📷
+                        </button>
+                        <button class="btn btn-icon" id="camera-btn" title="Take photo" ${isGenerating ? 'disabled' : ''}>
+                            📸
+                        </button>
+                        <label class="tools-toggle">
+                            <input type="checkbox" id="tools-toggle" ${enableTools ? 'checked' : ''} ${isGenerating ? 'disabled' : ''}>
+                            <span>Tools</span>
+                        </label>
+                    </div>
                     <div class="input-wrapper">
                         <textarea
                             id="message-input"
@@ -97,6 +112,8 @@ const ConversationDetail = (function() {
                             ${isGenerating ? 'Generating...' : 'Send'}
                         </button>
                     </div>
+                    <input type="file" id="image-file-input" accept="image/*" style="display: none;" multiple />
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" />
                 </div>
             </div>
         `;
@@ -134,17 +151,42 @@ const ConversationDetail = (function() {
             `;
         }
 
-        return messages.map(msg => `
-            <div class="message ${msg.role}" data-id="${msg.id}">
-                <div class="message-header">
-                    <span class="message-role">${msg.role === 'user' ? 'You' : 'Assistant'}</span>
-                    <span class="message-time">${formatTime(msg.timestamp)}</span>
+        return messages.map(msg => {
+            const roleLabel = msg.role === 'user' ? 'You' : (msg.role === 'tool' ? '🔧 Tool' : 'Assistant');
+
+            // Render images if present
+            const imagesHtml = (msg.images && msg.images.length > 0)
+                ? `<div class="message-images">
+                    ${msg.images.map(img => `<img src="${img}" class="message-image" />`).join('')}
+                   </div>`
+                : '';
+
+            // Render tool calls if present
+            const toolCallsHtml = (msg.tool_calls && msg.tool_calls.length > 0)
+                ? `<div class="tool-calls">
+                    ${msg.tool_calls.map(tc => `
+                        <div class="tool-call">
+                            <strong>🔧 ${escapeHtml(tc.function.name)}</strong>
+                            <pre><code>${escapeHtml(JSON.stringify(tc.function.arguments, null, 2))}</code></pre>
+                        </div>
+                    `).join('')}
+                   </div>`
+                : '';
+
+            return `
+                <div class="message ${msg.role}" data-id="${msg.id}">
+                    <div class="message-header">
+                        <span class="message-role">${roleLabel}</span>
+                        <span class="message-time">${formatTime(msg.timestamp)}</span>
+                    </div>
+                    ${imagesHtml}
+                    ${toolCallsHtml}
+                    <div class="message-content">
+                        ${formatMessage(msg.content)}
+                    </div>
                 </div>
-                <div class="message-content">
-                    ${formatMessage(msg.content)}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Update messages display without full re-render
@@ -193,6 +235,176 @@ const ConversationDetail = (function() {
         scrollToBottom();
     }
 
+    // Handle image file selection
+    async function handleImageSelection(files) {
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+
+            try {
+                const base64 = await fileToBase64(file);
+                const preview = URL.createObjectURL(file);
+
+                selectedImages.push({ data: base64, preview });
+            } catch (error) {
+                console.error('Failed to process image:', error);
+            }
+        }
+
+        updateImagePreviews();
+    }
+
+    // Convert file to base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Update image previews
+    function updateImagePreviews() {
+        const container = document.getElementById('image-previews');
+        if (!container) return;
+
+        if (selectedImages.length === 0) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'flex';
+        container.innerHTML = selectedImages.map((img, index) => `
+            <div class="image-preview">
+                <img src="${img.preview}" />
+                <button class="remove-image" data-index="${index}">✕</button>
+            </div>
+        `).join('');
+
+        // Add event listeners for remove buttons
+        container.querySelectorAll('.remove-image').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                URL.revokeObjectURL(selectedImages[index].preview);
+                selectedImages.splice(index, 1);
+                updateImagePreviews();
+            });
+        });
+    }
+
+    // Send chat with tool execution support
+    async function sendChatWithTools(apiMessages, tools) {
+        let fullResponse = '';
+        let toolCallsReceived = [];
+
+        await OllamaService.chat(
+            conversation.model,
+            apiMessages,
+            {},
+            async (chunk, accumulatedText, isComplete, toolCalls) => {
+                // Handle text content
+                if (chunk.message && chunk.message.content) {
+                    fullResponse = accumulatedText;
+                    updateMessageInUI(currentMessageId, fullResponse, false);
+
+                    if (!isComplete) {
+                        await ConversationDB.updateMessage(currentMessageId, {
+                            content: fullResponse
+                        });
+                    }
+                }
+
+                // Handle tool calls
+                if (toolCalls && toolCalls.length > 0) {
+                    toolCallsReceived = toolCalls;
+                }
+
+                if (isComplete) {
+                    // Final update
+                    await ConversationDB.updateMessage(currentMessageId, {
+                        content: fullResponse,
+                        tool_calls: toolCallsReceived
+                    });
+
+                    const msgIndex = messages.findIndex(m => m.id === currentMessageId);
+                    if (msgIndex !== -1) {
+                        messages[msgIndex].content = fullResponse;
+                        messages[msgIndex].tool_calls = toolCallsReceived;
+                    }
+
+                    updateMessageInUI(currentMessageId, fullResponse, true);
+
+                    // Execute tools if any were called
+                    if (toolCallsReceived.length > 0) {
+                        await executeTools(toolCallsReceived, apiMessages);
+                    }
+                }
+            },
+            tools
+        );
+    }
+
+    // Execute tools and continue conversation
+    async function executeTools(toolCalls, previousMessages) {
+        for (const toolCall of toolCalls) {
+            const { name, arguments: args } = toolCall.function;
+
+            try {
+                // Parse arguments
+                const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+
+                // Execute tool
+                const result = await ToolRegistry.executeTool(name, parsedArgs);
+
+                // Add tool result message
+                const toolMessage = await ConversationDB.addMessage(conversationId, {
+                    role: 'tool',
+                    content: JSON.stringify(result, null, 2),
+                    metadata: { toolName: name, arguments: parsedArgs }
+                });
+
+                messages.push(toolMessage);
+                updateMessages();
+
+                // Build updated message history
+                const updatedMessages = [...previousMessages, {
+                    role: 'assistant',
+                    content: messages[messages.length - 2].content, // Last assistant message
+                    tool_calls: toolCalls
+                }, {
+                    role: 'tool',
+                    content: toolMessage.content
+                }];
+
+                // Continue conversation with tool result
+                const followUpMessage = await ConversationDB.addMessage(conversationId, {
+                    role: 'assistant',
+                    content: ''
+                });
+
+                messages.push(followUpMessage);
+                currentMessageId = followUpMessage.id;
+
+                // Send follow-up request
+                await sendChatWithTools(updatedMessages, null); // Don't send tools again in follow-up
+
+            } catch (error) {
+                console.error(`Tool execution failed: ${name}`, error);
+
+                // Add error message
+                const errorMessage = await ConversationDB.addMessage(conversationId, {
+                    role: 'tool',
+                    content: `Error: ${error.message}`,
+                    metadata: { toolName: name, error: true }
+                });
+
+                messages.push(errorMessage);
+                updateMessages();
+            }
+        }
+    }
+
     // Send a message
     async function sendMessage() {
         const input = document.getElementById('message-input');
@@ -201,7 +413,7 @@ const ConversationDetail = (function() {
         if (!input || !sendBtn) return;
 
         const messageText = input.value.trim();
-        if (!messageText || isGenerating) return;
+        if ((!messageText && selectedImages.length === 0) || isGenerating) return;
 
         // Disable input
         isGenerating = true;
@@ -211,13 +423,21 @@ const ConversationDetail = (function() {
         sendBtn.textContent = 'Generating...';
 
         try {
+            // Collect images for this message
+            const messageImages = selectedImages.map(img => img.data);
+
             // Add user message to database
             const userMessage = await ConversationDB.addMessage(conversationId, {
                 role: 'user',
-                content: messageText
+                content: messageText,
+                images: messageImages
             });
 
             messages.push(userMessage);
+
+            // Clear selected images
+            selectedImages = [];
+            updateImagePreviews();
             updateMessages();
 
             // Create assistant message placeholder
@@ -229,58 +449,32 @@ const ConversationDetail = (function() {
             messages.push(assistantMessage);
             currentMessageId = assistantMessage.id;
 
-            // Build message history for API
-            const apiMessages = messages.map(msg => ({
-                role: msg.role,
-                content: msg.content
-            }));
-
-            // Send to Ollama via WebSocket
-            let fullResponse = '';
-
-            await OllamaService.chat(
-                conversation.model,
-                apiMessages,
-                {},
-                async (chunk, accumulatedText, isComplete) => {
-                    if (chunk.message && chunk.message.content) {
-                        fullResponse = accumulatedText;
-
-                        // Update UI
-                        updateMessageInUI(currentMessageId, fullResponse, false);
-
-                        // Update in database periodically (every 100ms)
-                        if (!isComplete) {
-                            await ConversationDB.updateMessage(currentMessageId, {
-                                content: fullResponse
-                            });
-                        }
-                    }
-
-                    if (isComplete) {
-                        // Final update
-                        await ConversationDB.updateMessage(currentMessageId, {
-                            content: fullResponse
-                        });
-
-                        // Update message in local array
-                        const msgIndex = messages.findIndex(m => m.id === currentMessageId);
-                        if (msgIndex !== -1) {
-                            messages[msgIndex].content = fullResponse;
-                        }
-
-                        updateMessageInUI(currentMessageId, fullResponse, true);
-
-                        // Re-enable input
-                        isGenerating = false;
-                        input.disabled = false;
-                        sendBtn.disabled = false;
-                        sendBtn.textContent = 'Send';
-                        input.focus();
-                        currentMessageId = null;
-                    }
+            // Build message history for API (include images)
+            const apiMessages = messages.map(msg => {
+                const apiMsg = {
+                    role: msg.role,
+                    content: msg.content
+                };
+                // Add images if present
+                if (msg.images && msg.images.length > 0) {
+                    apiMsg.images = msg.images;
                 }
-            );
+                return apiMsg;
+            });
+
+            // Get tools if enabled
+            const tools = enableTools && ToolRegistry.hasTools() ? ToolRegistry.getToolSchemas() : null;
+
+            // Send to Ollama via WebSocket with tool handling
+            await sendChatWithTools(apiMessages, tools);
+
+            // Re-enable input
+            isGenerating = false;
+            input.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+            input.focus();
+            currentMessageId = null;
         } catch (error) {
             console.error('Failed to send message:', error);
             alert('Failed to send message: ' + error.message);
@@ -344,7 +538,7 @@ const ConversationDetail = (function() {
         const backBtn = document.getElementById('back-btn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-                Router.navigate('#/conversations');
+                window.AppRouter.navigate('#/conversations');
             });
         }
 
@@ -394,6 +588,46 @@ const ConversationDetail = (function() {
             input.addEventListener('input', () => {
                 input.style.height = 'auto';
                 input.style.height = Math.min(input.scrollHeight, 200) + 'px';
+            });
+        }
+
+        // Image upload button
+        const imageUploadBtn = document.getElementById('image-upload-btn');
+        const imageFileInput = document.getElementById('image-file-input');
+        if (imageUploadBtn && imageFileInput) {
+            imageUploadBtn.addEventListener('click', () => {
+                imageFileInput.click();
+            });
+
+            imageFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleImageSelection(e.target.files);
+                    e.target.value = ''; // Reset input
+                }
+            });
+        }
+
+        // Camera button
+        const cameraBtn = document.getElementById('camera-btn');
+        const cameraInput = document.getElementById('camera-input');
+        if (cameraBtn && cameraInput) {
+            cameraBtn.addEventListener('click', () => {
+                cameraInput.click();
+            });
+
+            cameraInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleImageSelection(e.target.files);
+                    e.target.value = ''; // Reset input
+                }
+            });
+        }
+
+        // Tools toggle
+        const toolsToggle = document.getElementById('tools-toggle');
+        if (toolsToggle) {
+            toolsToggle.addEventListener('change', (e) => {
+                enableTools = e.target.checked;
             });
         }
     }
