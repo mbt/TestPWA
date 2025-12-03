@@ -2,7 +2,7 @@
  * Our service worker.
  */
 
-const CACHE_NAME = 'testpwa-v23';
+const CACHE_NAME = 'testpwa-v24';
 const urlsToCache = [
     '.',
     'index.html',
@@ -22,6 +22,11 @@ const urlsToCache = [
     'knowledge-base-db.js',
     'knowledge-bases.js',
     'knowledge-base-detail.js',
+    'conversation-db.js',
+    'tool-registry.js',
+    'ollama-service.js',
+    'conversations.js',
+    'conversation-detail.js',
     'style.css',
     'application.webmanifest',
     'icons/app_32.png',
