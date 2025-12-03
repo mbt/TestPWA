@@ -47,7 +47,9 @@ wss.on('connection', (ws, req) => {
     ws.on('message', async (data) => {
         try {
             const message = JSON.parse(data.toString());
-            console.log(`[WebSocket] Received message type: ${message.type}`);
+            console.log(`\n[WebSocket] <<<< RECEIVED FROM CLIENT:`);
+            console.log(`  Type: ${message.type}`);
+            console.log(`  Payload:`, JSON.stringify(message.payload, null, 2));
 
             // Handle different message types
             switch (message.type) {
@@ -61,6 +63,7 @@ wss.on('connection', (ws, req) => {
                     await handleModelsRequest(ws, message);
                     break;
                 default:
+                    console.error(`[WebSocket] Unknown message type: ${message.type}`);
                     ws.send(JSON.stringify({
                         type: 'error',
                         error: `Unknown message type: ${message.type}`
@@ -109,6 +112,10 @@ async function handleChatRequest(ws, message) {
 
     const requestData = JSON.stringify(requestBody);
 
+    console.log(`\n[Ollama] >>>> SENDING TO OLLAMA:`);
+    console.log(`  Endpoint: ${OLLAMA_PROTOCOL}://${OLLAMA_HOST}:${OLLAMA_PORT}/api/chat`);
+    console.log(`  Request:`, JSON.stringify(requestBody, null, 2));
+
     const requestOptions = {
         hostname: OLLAMA_HOST,
         port: OLLAMA_PORT,
@@ -123,7 +130,7 @@ async function handleChatRequest(ws, message) {
     const httpModule = OLLAMA_PROTOCOL === 'https' ? https : http;
 
     const req = httpModule.request(requestOptions, (res) => {
-        console.log(`[Ollama] Response status: ${res.statusCode}`);
+        console.log(`\n[Ollama] <<<< RESPONSE STATUS: ${res.statusCode}`);
 
         res.on('data', (chunk) => {
             try {
@@ -132,24 +139,29 @@ async function handleChatRequest(ws, message) {
 
                 for (const line of lines) {
                     const data = JSON.parse(line);
+                    console.log(`[Ollama] <<<< Stream chunk:`, JSON.stringify(data));
 
                     // Forward the response to the client
-                    ws.send(JSON.stringify({
+                    const response = {
                         type: 'chat_response',
                         payload: data
-                    }));
+                    };
+                    console.log(`[WebSocket] >>>> SENDING TO CLIENT:`, JSON.stringify(response));
+                    ws.send(JSON.stringify(response));
                 }
             } catch (error) {
-                console.error('[Ollama] Error parsing chunk:', error);
+                console.error('[Ollama] Error parsing chunk:', error, 'Raw:', chunk.toString());
             }
         });
 
         res.on('end', () => {
-            console.log('[Ollama] Request completed');
-            ws.send(JSON.stringify({
+            console.log(`\n[Ollama] Request completed`);
+            const completion = {
                 type: 'chat_complete',
                 payload: { done: true }
-            }));
+            };
+            console.log(`[WebSocket] >>>> SENDING TO CLIENT:`, JSON.stringify(completion));
+            ws.send(JSON.stringify(completion));
         });
     });
 

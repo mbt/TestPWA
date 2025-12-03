@@ -295,6 +295,13 @@ const ConversationDetail = (function() {
 
     // Send chat with tool execution support
     async function sendChatWithTools(apiMessages, tools) {
+        console.log('[ConversationDetail] sendChatWithTools called with:', {
+            model: conversation.model,
+            messageCount: apiMessages.length,
+            toolsEnabled: !!tools,
+            toolCount: tools ? tools.length : 0
+        });
+
         let fullResponse = '';
         let toolCallsReceived = [];
 
@@ -303,9 +310,18 @@ const ConversationDetail = (function() {
             apiMessages,
             {},
             async (chunk, accumulatedText, isComplete, toolCalls) => {
+                console.log('[ConversationDetail] Chunk received:', {
+                    hasMessage: !!chunk.message,
+                    hasContent: !!(chunk.message && chunk.message.content),
+                    accumulatedLength: accumulatedText.length,
+                    isComplete,
+                    toolCallsCount: toolCalls ? toolCalls.length : 0
+                });
+
                 // Handle text content
                 if (chunk.message && chunk.message.content) {
                     fullResponse = accumulatedText;
+                    console.log('[ConversationDetail] Updating UI with text, length:', fullResponse.length);
                     updateMessageInUI(currentMessageId, fullResponse, false);
 
                     if (!isComplete) {
@@ -317,10 +333,13 @@ const ConversationDetail = (function() {
 
                 // Handle tool calls
                 if (toolCalls && toolCalls.length > 0) {
+                    console.log('[ConversationDetail] Tool calls detected:', toolCalls);
                     toolCallsReceived = toolCalls;
                 }
 
                 if (isComplete) {
+                    console.log('[ConversationDetail] Message complete. Final length:', fullResponse.length, 'Tool calls:', toolCallsReceived.length);
+
                     // Final update
                     await ConversationDB.updateMessage(currentMessageId, {
                         content: fullResponse,
@@ -337,6 +356,7 @@ const ConversationDetail = (function() {
 
                     // Execute tools if any were called
                     if (toolCallsReceived.length > 0) {
+                        console.log('[ConversationDetail] Executing tools:', toolCallsReceived);
                         await executeTools(toolCallsReceived, apiMessages);
                     }
                 }
@@ -347,14 +367,19 @@ const ConversationDetail = (function() {
 
     // Execute tools and continue conversation
     async function executeTools(toolCalls, previousMessages) {
+        console.log('[ConversationDetail] executeTools called with', toolCalls.length, 'tool calls');
+
         for (const toolCall of toolCalls) {
+            console.log('[ConversationDetail] Processing tool call:', toolCall);
+
             // Validate tool call structure
             if (!toolCall || !toolCall.function || !toolCall.function.name) {
-                console.error('Invalid tool call structure:', toolCall);
+                console.error('[ConversationDetail] Invalid tool call structure:', toolCall);
                 continue;
             }
 
             const { name, arguments: args } = toolCall.function;
+            console.log('[ConversationDetail] Tool:', name, 'Args:', args);
 
             try {
                 // Parse arguments with better error handling
@@ -363,17 +388,21 @@ const ConversationDetail = (function() {
                     if (typeof args === 'string') {
                         try {
                             parsedArgs = JSON.parse(args);
+                            console.log('[ConversationDetail] Parsed args:', parsedArgs);
                         } catch (parseError) {
-                            console.error(`Failed to parse tool arguments for ${name}:`, args);
+                            console.error(`[ConversationDetail] Failed to parse tool arguments for ${name}:`, args);
                             throw new Error(`Invalid JSON arguments: ${parseError.message}`);
                         }
                     } else if (typeof args === 'object') {
                         parsedArgs = args;
+                        console.log('[ConversationDetail] Args already object:', parsedArgs);
                     }
                 }
 
                 // Execute tool
+                console.log('[ConversationDetail] Executing tool:', name, 'with args:', parsedArgs);
                 const result = await ToolRegistry.executeTool(name, parsedArgs);
+                console.log('[ConversationDetail] Tool result:', result);
 
                 // Add tool result message
                 const toolMessage = await ConversationDB.addMessage(conversationId, {

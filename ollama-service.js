@@ -55,6 +55,7 @@ const OllamaService = (function() {
                 ws.onmessage = (event) => {
                     try {
                         const message = JSON.parse(event.data);
+                        console.log('[OllamaService] <<<< RECEIVED FROM SERVER:', JSON.stringify(message, null, 2));
                         handleMessage(message);
                     } catch (error) {
                         console.error('[OllamaService] Error parsing message:', error);
@@ -130,6 +131,7 @@ const OllamaService = (function() {
 
         return new Promise((resolve, reject) => {
             try {
+                console.log('[OllamaService] >>>> SENDING TO SERVER:', JSON.stringify(message, null, 2));
                 ws.send(JSON.stringify(message));
                 resolve();
             } catch (error) {
@@ -228,21 +230,29 @@ const OllamaService = (function() {
         const unsubscribe = registerMessageHandler('chat', (message) => {
             if (message.type === 'chat_response') {
                 const chunk = message.payload;
+                console.log('[OllamaService] Processing chat chunk:', {
+                    hasContent: !!(chunk.message && chunk.message.content),
+                    hasToolCalls: !!(chunk.message && chunk.message.tool_calls),
+                    chunk: chunk
+                });
 
                 // Handle text content
                 if (chunk.message && chunk.message.content) {
                     fullResponse += chunk.message.content;
+                    console.log('[OllamaService] Accumulated text length:', fullResponse.length);
                 }
 
                 // Handle tool calls
                 if (chunk.message && chunk.message.tool_calls) {
                     toolCalls = chunk.message.tool_calls;
+                    console.log('[OllamaService] Tool calls received:', JSON.stringify(toolCalls, null, 2));
                 }
 
                 if (onChunk) {
                     onChunk(chunk, fullResponse, false, toolCalls);
                 }
             } else if (message.type === 'chat_complete') {
+                console.log('[OllamaService] Chat complete. Final response length:', fullResponse.length, 'Tool calls:', toolCalls.length);
                 unsubscribe();
                 if (onChunk) {
                     onChunk(message.payload, fullResponse, true, toolCalls);
