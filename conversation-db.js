@@ -197,9 +197,11 @@ const ConversationDB = (function() {
 
             const msg = {
                 conversationId: conversationId,
-                role: message.role || 'user', // 'user' or 'assistant'
+                role: message.role || 'user', // 'user', 'assistant', or 'tool'
                 content: message.content || '',
                 timestamp: new Date().toISOString(),
+                images: message.images || [], // Array of base64 encoded images
+                tool_calls: message.tool_calls || [], // Tool calls from assistant
                 metadata: message.metadata || {}
             };
 

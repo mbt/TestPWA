@@ -88,14 +88,26 @@ wss.on('connection', (ws, req) => {
  * Handle chat requests - proxies to Ollama's /api/chat endpoint
  */
 async function handleChatRequest(ws, message) {
-    const { model, messages, options, stream = true } = message.payload;
+    const { model, messages, options, stream = true, tools, format } = message.payload;
 
-    const requestData = JSON.stringify({
+    const requestBody = {
         model: model || 'llama2',
         messages: messages || [],
         stream: stream,
         options: options || {}
-    });
+    };
+
+    // Add tools if provided
+    if (tools && tools.length > 0) {
+        requestBody.tools = tools;
+    }
+
+    // Add format if provided (for JSON mode)
+    if (format) {
+        requestBody.format = format;
+    }
+
+    const requestData = JSON.stringify(requestBody);
 
     const requestOptions = {
         hostname: OLLAMA_HOST,
