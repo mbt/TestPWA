@@ -100,7 +100,8 @@ const OllamaService = (function() {
 
     // Handle incoming messages
     const handleMessage = (message) => {
-        console.log('[OllamaService] Received:', message.type);
+        console.log('[OllamaService] Received message type:', message.type);
+        console.log('[OllamaService] Complete message object:', JSON.stringify(message, null, 2));
 
         switch (message.type) {
             case 'chat_response':
