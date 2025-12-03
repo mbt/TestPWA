@@ -20,7 +20,7 @@ const ConversationDetail = (function() {
         try {
             const data = await ConversationDB.getConversationWithMessages(conversationId);
             if (!data) {
-                Router.navigate('#/conversations');
+                window.AppRouter.navigate('#/conversations');
                 return false;
             }
 
@@ -44,7 +44,7 @@ const ConversationDetail = (function() {
             return true;
         } catch (error) {
             console.error('Failed to load conversation:', error);
-            Router.navigate('#/conversations');
+            window.AppRouter.navigate('#/conversations');
             return false;
         }
     }
@@ -538,7 +538,7 @@ const ConversationDetail = (function() {
         const backBtn = document.getElementById('back-btn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-                Router.navigate('#/conversations');
+                window.AppRouter.navigate('#/conversations');
             });
         }
 
