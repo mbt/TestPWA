@@ -19,7 +19,7 @@ const Home = (function() {
 
         const tagline = document.createElement('p');
         tagline.className = 'home-tagline';
-        tagline.textContent = 'A collection of reusable, framework-free Web Components, AI prompts, and knowledge bases for modern web development';
+        tagline.textContent = 'A collection of reusable, framework-free Web Components, AI prompts, knowledge bases, and LLM conversations for modern web development';
 
         const ctaContainer = document.createElement('div');
         ctaContainer.style.display = 'flex';
@@ -42,9 +42,15 @@ const Home = (function() {
         knowledgeBaseCta.className = 'home-cta';
         knowledgeBaseCta.textContent = 'Knowledge Bases';
 
+        const conversationsCta = document.createElement('a');
+        conversationsCta.href = '#/conversations';
+        conversationsCta.className = 'home-cta';
+        conversationsCta.textContent = 'AI Conversations';
+
         ctaContainer.appendChild(componentCta);
         ctaContainer.appendChild(promptCta);
         ctaContainer.appendChild(knowledgeBaseCta);
+        ctaContainer.appendChild(conversationsCta);
 
         hero.appendChild(title);
         hero.appendChild(tagline);
