@@ -4,7 +4,8 @@
   "description": "A test Progressive Web Application demonstrating PWA capabilities",
   "main": "app.js",
   "scripts": {
-    "start": "npx http-server -p 8080 -c-1",
+    "start": "node server.js",
+    "start:static": "npx http-server -p 8080 -c-1",
     "docker:build": "docker build -f .devcontainer/Dockerfile -t testpwa .",
     "docker:run": "docker run -p 8080:80 testpwa",
     "validate:manifest": "npx web-app-manifest-validator application.webmanifest"
@@ -20,6 +21,10 @@
   "repository": {
     "type": "git",
     "url": "http://127.0.0.1:16323/git/mbt/TestPWA"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
   },
   "devDependencies": {},
   "engines": {

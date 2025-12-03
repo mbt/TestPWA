@@ -123,6 +123,20 @@
                 return;
             }
 
+            // Check for conversations gallery route
+            if (hash === '/conversations') {
+                this.routes['/conversations']();
+                return;
+            }
+
+            // Check for conversation detail route
+            const convMatch = hash.match(/^\/conversations\/([^/]+)$/);
+            if (convMatch) {
+                const convId = convMatch[1];
+                this.routes['/conversations/:id'](convId);
+                return;
+            }
+
             // Check for gallery route
             if (hash === '/gallery') {
                 this.routes['/gallery']();
@@ -252,6 +266,18 @@
         KnowledgeBaseDetail.render(kbId);
     });
 
+    // Conversations gallery view
+    Router.register('/conversations', function() {
+        Router.currentView = ConversationsGallery;
+        ConversationsGallery.render();
+    });
+
+    // Conversation detail view
+    Router.register('/conversations/:id', function(convId) {
+        Router.currentView = ConversationDetail;
+        ConversationDetail.render(convId);
+    });
+
     // Handle hash changes (browser back/forward buttons and direct hash changes)
     window.addEventListener('hashchange', () => {
         Router.render();
@@ -272,6 +298,15 @@
             })
             .catch((error) => {
                 console.error('Failed to initialize Knowledge Base database:', error);
+            });
+
+        // Initialize Conversation database
+        ConversationDB.init()
+            .then(() => {
+                console.log('Conversation database initialized');
+            })
+            .catch((error) => {
+                console.error('Failed to initialize Conversation database:', error);
             });
 
         // Create app container
