@@ -348,11 +348,29 @@ const ConversationDetail = (function() {
     // Execute tools and continue conversation
     async function executeTools(toolCalls, previousMessages) {
         for (const toolCall of toolCalls) {
+            // Validate tool call structure
+            if (!toolCall || !toolCall.function || !toolCall.function.name) {
+                console.error('Invalid tool call structure:', toolCall);
+                continue;
+            }
+
             const { name, arguments: args } = toolCall.function;
 
             try {
-                // Parse arguments
-                const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
+                // Parse arguments with better error handling
+                let parsedArgs = {};
+                if (args) {
+                    if (typeof args === 'string') {
+                        try {
+                            parsedArgs = JSON.parse(args);
+                        } catch (parseError) {
+                            console.error(`Failed to parse tool arguments for ${name}:`, args);
+                            throw new Error(`Invalid JSON arguments: ${parseError.message}`);
+                        }
+                    } else if (typeof args === 'object') {
+                        parsedArgs = args;
+                    }
+                }
 
                 // Execute tool
                 const result = await ToolRegistry.executeTool(name, parsedArgs);
